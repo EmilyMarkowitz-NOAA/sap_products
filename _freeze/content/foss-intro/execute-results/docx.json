@@ -1,0 +1,20 @@
+{
+  "hash": "03766e40a313f780c177ab61f6ec90df",
+  "result": {
+    "markdown": "---\ntitle: Public Data (FOSS)\n---\n\n\n\n\n\n\nThe final, validated survey data are publicly accessible soon after surveys are completed on the [Fisheries One Stop Shop (FOSS) platform](https://www.fisheries.noaa.gov/foss/). This data includes catch, haul, and environmental data collected at each station. On the [FOSS data platform](https://www.fisheries.noaa.gov/foss/), users can interactively select, view, and download data. Descriptive documentation and user-examples are available on the metadata page.\n\nThis data contains all of the catch, environmental, and haul data from the fisheries-independent Groundfish and Shellfish Assessment Program surveys in the Bering Sea, Aleutian Islands, and Gulf of Alaska. This data is sought after by the general public, private entities, and NOAA partners alike, including tribal organizations, K-12 classrooms, academic institutions, for-profit groups, and non-profit groups. This data is compiled and approved once a year after each summer survey season and is available for open access. \n\n**Learn more about our data available on FOSS on the [Groundfish Assessment Program's data products website](https://afsc-gap-products.github.io/gap_products/content/foss-intro.html).**\n\n## Cite this data\n\nUse the below bibtext citation, as cited in our group's [citation repository](https://github.com/afsc-gap-products/citations/blob/main/cite/bibliography.bib) for citing the data created and maintained in this repository. Add \"note = {Accessed: mm/dd/yyyy}\" to append the day this data was accessed. \n\n\n\n\n::: {.cell}\n::: {.cell-output .cell-output-stdout}\n```\n[1] \"@misc{FOSSAFSCData,\"                                                                           \n[2] \"  author = {{NOAA Fisheries Alaska Fisheries Science Center}},\"                                \n[3] \"  year = {2024}, \"                                                                             \n[4] \"  title = {Fisheries One Stop Shop Public Data: RACE Division Bottom Trawl Survey Data Query},\"\n[5] \"  howpublished = {https://www.fisheries.noaa.gov/foss},\"                                       \n[6] \"  publisher = {{U.S. Dep. Commer.}},\"                                                          \n[7] \"  copyright = {Public Domain} \"                                                                \n[8] \"}\"                                                                                             \n```\n:::\n:::\n\n::: {.cell}\n\n:::\n",
+    "supporting": [
+      "foss-intro_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}

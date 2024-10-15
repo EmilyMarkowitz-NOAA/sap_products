@@ -1,0 +1,185 @@
+# Load libaries and funcitons --------------------------------------------------
+
+PKG <- c(
+  # Keeping Organized
+  "devtools", # Package development tools for R; used here for downloading packages from GitHub
+  "distill",
+  "gapindex", # devtools::install_github("afsc-gap-products/gapindex")
+  "akgfmaps", # devtools::install_github("afsc-gap-products/akgfmaps")
+  "dplyr",
+  "googledrive",
+  "magrittr",
+  "readr",
+  "tidyr",
+  "readxl",
+  "janitor",
+  "kableExtra",
+  "flextable",
+  "here",
+  "stringr",
+  "scales", 
+  "badger",
+  "ftExtra", 
+  "RODBC",
+  "DBI",
+  "akfingapdata" # devtools::install_github("MattCallahan-NOAA/akfingapdata")
+)
+
+PKG <- unique(PKG)
+for (p in PKG) {
+  # library(p, character.only = TRUE)
+  if (!require(p, character.only = TRUE)) {
+    install.packages(p)
+    require(p, character.only = TRUE)
+  }
+}
+
+# connect to oracle ------------------------------------------------------------
+
+if (file.exists("Z:/Projects/ConnectToOracle.R")) {
+  source("Z:/Projects/ConnectToOracle.R")
+  channel_ehm <- channel # temporary for testing
+  channel <- channel_products
+  channel_akfin <- channel_akfin
+} else {
+  library(gapindex)
+  channel <- gapindex::get_connected()
+  # For those without a ConnectToOracle file
+  library(rstudioapi)
+  library(RODBC)
+  channel_ehm <- odbcConnect(dsn = "AFSC", 
+                               uid = rstudioapi::showPrompt(title = "Username", 
+                                                            message = "Oracle Username", default = ""), 
+                               pwd = rstudioapi::askForPassword("Enter Password"),
+                               believeNRows = FALSE)
+  channel_akfin <- odbcConnect(dsn = "AFSC", 
+                         uid = rstudioapi::showPrompt(title = "Username", 
+                                                      message = "Oracle Username", default = ""), 
+                         pwd = rstudioapi::askForPassword("Enter Password"),
+                         believeNRows = FALSE)
+}
+
+# knowns -----------------------------------------------------------------------
+link_foss <- "https://www.fisheries.noaa.gov/foss"
+link_repo <- "https://github.com/EmilyMarkowitz-NOAA/sap_products"
+link_repo_web <- "https://EmilyMarkowitz-NOAA.github.io/sap_products/"
+link_code_books <- "https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual"
+pretty_date <- format(Sys.Date(), "%B %d, %Y")
+crs_out <- "EPSG:3338"
+
+# # Write README -----------------------------------------------------------------
+# 
+# rmarkdown::render(paste0(here::here("content","README.Rmd")),
+#                   output_dir = here::here(),
+#                   output_file = paste0("README.md"))
+
+# Download citations -----------------------------------------------------------
+
+write.table(x = readLines(con = "https://raw.githubusercontent.com/citation-style-language/styles/master/apa-no-ampersand.csl"),
+            file = here::here("content/references.csl"), 
+            row.names = FALSE, 
+            col.names = FALSE, 
+            quote = FALSE)
+
+write.table(x = readLines(con = "https://raw.githubusercontent.com/afsc-gap-products/citations/main/cite/bibliography.bib"),
+            file = here::here("content/references.bib"), 
+            row.names = FALSE, 
+            col.names = FALSE, 
+            quote = FALSE)
+
+# Dynamically identify citations of interest ----------------------------------
+
+find_citation_for <- function(bib_ref = "GAPProducts") {
+  bib0 <- readLines(con = here::here("content/references.bib"))
+  citation_start_all <- which(grepl(pattern = "@", x = bib0))
+  citation_start <- which(grepl(pattern = bib_ref, x = bib0))
+  citation_end <- (citation_start_all[citation_start_all>citation_start][1])-1
+  citation_end <- ifelse(is.na(citation_end), length(bib0), citation_end)
+  citation <- bib0[citation_start:citation_end]
+  citation <- citation[citation != ""]
+  return(citation)
+}
+
+# Functions --------------------------------------------------------------------
+
+print_table_metadata <- function(channel, locations, owner = "GAP_PRODUCTS") {
+  # Query all table comments for each table in `locations`
+  b <- RODBC::sqlQuery(
+    channel = channel,
+    query = paste0(
+      "WITH Q_TABLE AS (SELECT MVIEW_NAME AS TABLE_NAME, COMMENTS
+       FROM USER_MVIEW_COMMENTS    
+       UNION
+       SELECT TABLE_NAME, COMMENTS
+       FROM ALL_TAB_COMMENTS 
+       WHERE OWNER = '",owner,"' AND TABLE_TYPE = 'TABLE')
+       
+       SELECT * FROM Q_TABLE
+       JOIN (SELECT TABLE_NAME, NUM_ROWS 
+             FROM ALL_TABLES WHERE OWNER = '",owner,"') USING (TABLE_NAME)
+       JOIN (SELECT TABLE_NAME, COUNT(*) AS NUM_COLS
+             FROM ALL_TAB_COLUMNS 
+             WHERE OWNER = '",owner,"'
+             GROUP BY TABLE_NAME) USING (TABLE_NAME)
+       WHERE TABLE_NAME IN ", gapindex::stitch_entries(locations)))
+  
+  ## Query all fields contained within each table in `locations`
+  if (grepl(pattern = "UID=GAP_PRODUCTS", x = channel, ignore.case = TRUE)) {
+  b_columns <-
+    RODBC::sqlQuery(
+      channel = channel,
+      query =
+        paste0(
+          "SELECT TABLE_NAME,
+      COLUMN_NAME AS \"Column name from data\",
+      GP_META.METADATA_colname_long AS \"Descriptive column Name\" ,
+      GP_META.METADATA_units AS \"Units\",
+      GP_META.METADATA_datatype AS \"Oracle data type\",
+      GP_META.METADATA_colname_desc AS \"Column description\"
+      FROM ALL_TAB_COLS
+      JOIN (GAP_PRODUCTS.METADATA_COLUMN) GP_META
+          ON GP_META.METADATA_COLNAME = ALL_TAB_COLS.COLUMN_NAME
+      WHERE OWNER = 'GAP_PRODUCTS' AND TABLE_NAME IN ",
+          gapindex::stitch_entries(b$TABLE_NAME)
+        )
+    )
+  } else {
+    b_columns <- data.frame("TABLE_NAME" = b$TABLE_NAME, 
+                            "Column name from data"	= "test", 
+                            "Descriptive column Name"	= "test", 
+                            "Units"	= "test", 
+                            "Oracle data type" = "test", 
+                            "Column description" = "test")
+  }
+  # Collect all column metadata for all table locations
+  str00 <- paste0("## Data tables", "\n\n")
+  
+  for (i in 1:length(locations)) {
+
+    str000 <- paste0(
+        "### ", b$TABLE_NAME[i], "\n\n",
+        b$COMMENTS[i], "\n\n",
+        # "Number of rows: ", formatC(x = b$NUM_ROWS[i], 
+        #                             digits = 0, 
+        #                             format = "f", 
+        #                             big.mark = ","),
+        "\n\nNumber of columns: ", formatC(x = b$NUM_COLS[i], 
+                                           digits = 0, 
+                                           format = "f", 
+                                           big.mark = ","),
+        "\n\n",
+        kableExtra::kable(subset(x = b_columns,
+                                 subset = TABLE_NAME == b$TABLE_NAME[i],
+                                 select = -TABLE_NAME),
+                          row.names = FALSE, format = "html") %>%
+        kableExtra::kable_styling(bootstrap_options = "striped"),
+        "\n\n\n"
+      )
+    
+    str00 <- paste0(str00, str000)
+    
+  }
+  return(str00)
+}
+
+

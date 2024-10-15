@@ -1,0 +1,107 @@
+project: 
+  type: book
+  output-dir: docs
+  pre-render: content/functions.R
+  # post-render: content/post-render.R
+
+book: 
+  page-navigation: true
+  title: "SAP Production Data Documentation" 
+  site-url: "https://afsc-gap-products.github.io/gap_products" 
+  repo-url: "https://github.com/afsc-gap-products/gap_products"
+  repo-actions: [edit, source, issue]
+  favicon: img/favicon.png
+  downloads: [pdf, docx]
+  search: true
+  author:
+    - name: Shellfish Assessment Program Survey Team
+      email: shannon.hennessey@noaa.gov 
+      note: https://github.com/AFSC-Shellfish-Assessment-Program
+      affiliations:
+        - name: NOAA Fisheres Alaska Fisheries Science Center
+          department: Groundfish Assessment Program
+  chapters:
+    - part: index.qmd
+      chapters:
+        - content/intro-survey-background.qmd
+        - content/intro-workflow.qmd
+        - content/intro-news.qmd
+        - content/intro-code-of-conduct.qmd
+    - part: content/product-intro.qmd
+      chapters:
+        - content/product-metadata.qmd
+        - content/product-metadata-column.qmd
+    - part: content/akfin-intro.qmd
+      chapters:
+        - content/akfin-metadata.qmd
+        # - content/akfin-oracle-sql-r.qmd
+        # - content/akfin-api-r.qmd
+    - part: content/foss-intro.qmd
+    - part: content/other-intro.qmd
+    - part: content/end-contact-us.qmd 
+      chapters:
+        - content/end-run-notes.qmd
+        - content/end-acknowledgements.qmd
+        - content/end-refs.qmd
+        
+  page-footer:
+    right: "[U.S. Department of Commerce](https://www.commerce.gov/) | [National Oceanographic and Atmospheric Administration](https://www.noaa.gov) | [NOAA Fisheries](https://www.fisheries.noaa.gov/)" 
+    left: "&copy; CC-1.0"
+  
+  sidebar:
+    background: "#D9E3E4"
+    logo: "https://avatars.githubusercontent.com/u/91760178?s=96&amp;v=4"
+    favicon: img/favicon.ico
+    pinned: true
+    align: center
+    tools: 
+      - icon: globe
+        href: https://github.com/AFSC-Shellfish-Assessment-Program
+        text: "AFSC SAP Survey Data Products"
+    style: "docked"
+    search: true
+    collapse-level: 2
+
+bibliography: [content/references.bib]
+csl: content/references.csl
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-no-ampersand.csl
+# bibliography: https://raw.githubusercontent.com/afsc-gap-products/citations/main/cite/bibliography.bib
+
+execute:
+  echo: false
+  # eval: true
+  error: false
+  message: false
+  comment: false
+  warning: false
+  code-overflow: wrap
+  freeze: auto
+
+format:
+  titlepage-pdf:
+    documentclass: scrbook
+    classoption: ["oneside", "open=any"]
+    titlepage: "plain"
+    keep-tex: true
+    latex_engine: xelatex
+    pandoc_args: "--latex-engine-opt=--enable-write18"
+  docx:
+    toc: true
+    toc-depth: 2
+    reference-doc: template.docx
+    always_allow_html: true
+  html:
+    theme: [cosmo, assets/theme.scss] 
+    toc: true
+    toc-depth: 3
+    number-sections: false
+    include-before-body: translate.html    
+
+filters:
+  - assets/include-files.lua
+  - quarto
+
+# Comment next 2 lines if the PDF is having trouble
+metadata-files:
+  - _frontmatter.yml
+  - quarto 

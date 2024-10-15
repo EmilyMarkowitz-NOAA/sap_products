@@ -1,0 +1,23 @@
+SAP_PRODUCTS ChangeLog (last produced on 2024-10-15), initial development & template
+Run completed by: Emily Markowitz (GAP)
+
+This is the initial few commits for developing this platform. 
+
+Changes to files since last deployment: 
+
+cpue: 
+There are X new records, Y removed records, and Z modified records.
+
+biomass: 
+There are X new records, Y removed records, and Z modified records.
+
+sizecomp: 
+There are X new records, Y removed records, and Z modified records.
+
+stratum: 
+There are X new records, Y removed records, and Z modified records.
+
+haul: 
+There are X new records, Y removed records, and Z modified records.
+
+

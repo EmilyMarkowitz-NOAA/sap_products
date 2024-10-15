@@ -1,0 +1,42 @@
+METADATA_SENTENCE_NAME,METADATA_SENTENCE_TYPE,METADATA_SENTENCE
+survey_institution,fragment,by the Resource Assessment and Conservation Engineering Division (RACE) Groundfish Assessment Program (GAP) of the Alaska Fisheries Science Center (AFSC).
+legal_restrict,sentence,There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).
+legal_restrict_none,sentence,There are no legal restrictions on access to the data.
+foss,sentence,The data from this dataset are shared on the Fisheries One Stop Stop (FOSS) platform (https://www.fisheries.noaa.gov/foss/).
+github,sentence,The GitHub repository for the scripts that created this code can be found at (https://github.com/afsc-gap-products/gap_products).
+last_updated,sentence,These data were last updated INSERT_DATE.
+codebook,sentence,"For more information about codes used in the tables, please refer to the survey code books (https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual)."
+surveys,fragment,"the northern Bering Sea (NBS), eastern Bering Sea (EBS), Gulf of Alaska (GOA), Aleutian Islands (AI), Bering Sea Slope (BSS) Surveys"
+biomass_description,sentence,"Stratum/subarea/region-level mean CPUE (weight and numbers), total biomass, and total abundance with associated variances."
+cpue_description,sentence,Haul-level zero-filled weight and numerical catch-per-unit-effort.
+sizecomp_description,sentence,Stratum/subarea/region-level size compositions by sex.
+agecomp_description,sentence,Stratum- and region-level age compositions by sex.
+area_description,sentence,"Information related to the various strata, subareas, INPFC and NMFS management areas, and regions for the Aleutian Islands, Gulf of Alaska, and Bering Sea shelf and slope bottom trawl surveys."
+taxon_groups_description,sentence,GAP_PRODUCTS.TAXONOMIC_CLASSIFICATION subsetted for taxonomic classifications accepted by the GAP bottom trawl survey and added GROUP_CODE to denote taxonomic aggregations.
+survey_design_description,sentence,"This table contains for a given survey (via SURVEY_DEFINITION_ID) and survey year (YEAR), which version (DESIGN_YEAR) of the AREA_IDs that were used to calculate the various standard data products."
+metadata_table_description,sentence,This table is used to string together the various table comments for the tables in GAP_PRODUCTS.
+metadata_column_description,sentence,This table is used to string together the various field comments for the tables in GAP_PRODUCTS.
+stratum_groups_description,sentence,"Lookup table for which strata are contained within a given subarea, INPFC or NMFS management area, or region for the Aleutian Islands, Gulf of Alaska, and Bering Sea shelf and slope bottom trawl surveys."
+taxonomic_confidence_description,sentence,"The quality and specificity of field identifications for many taxa have fluctuated over the history of the surveys due to changing priorities and resources. The matrix lists a confidence level for each taxon for each survey year and is intended to serve as a general guideline for data users interested in assessing the relative reliability of historical species identifications on the bottom trawl survey. Quality Codes: 1: High confidence and consistency. Taxonomy is stable and reliable at this level, and field identification characteristics are well known and reliable. 2: Moderate confidence. Taxonomy may be questionable at this level, or field identification characteristics may be variable and difficult to assess consistently. 3: Low confidence. Taxonomy is incompletely known, or reliable field identification characteristics are unknown. NA: Unassessed. Taxonomy quality has not been assessed."
+taxonomic_changes_description,sentence,Summary of changes in taxonomic names and SPECIES_CODE values.
+taxonomic_classification_description,sentence,Taxonomic classification information for the current list of SPECIES_CODE values.
+akfin_agecomp_description,sentence,Mirror of GAP_PRODUCTS.AGECOMP.
+akfin_area_description,sentence,Mirror of GAP_PRODUCTS.AREA.
+akfin_biomass_description,sentence,Mirror of GAP_PRODUCTS.BIOMASS.
+akfin_catch_description,sentence,"Catch subsetted for standard GAP bottom trawl stations (i.e., HAULJOIN values associated with ABUNDANCE_HAUL = Y in RACEBASE.HAUL)."
+akfin_cpue_description,sentence,Mirror of GAP_PRODUCTS.CPUE.
+akfin_cruise_description,sentence,Cruise data for the five standard GAP bottom trawl regions.
+akfin_haul_description,sentence,Standard GAP bottom trawl haul (station) data.
+akfin_length_description,sentence,"Length data subsetted for standard GAP bottom trawl stations (i.e., HAULJOIN values associated with ABUNDANCE_HAUL = Y in RACEBASE.HAUL)."
+akfin_metadata_column_description,sentence,Mirror of GAP_PRODUCTS.METADATA_COLUMN.
+akfin_sizecomp_description,sentence,Mirror of GAP_PRODUCTS.SIZECOMP.
+akfin_specimen_description,sentence,"Specimen data subsetted for standard GAP bottom trawl stations (i.e., HAULJOIN values associated with ABUNDANCE_HAUL = Y in RACEBASE.HAUL)."
+akfin_stratum_groups_description,sentence,Mirror of GAP_PRODUCTS.STRATUM_GROUPS.
+akfin_survey_design_description,sentence,Mirror of GAP_PRODUCTS.SURVEY_DESIGN.
+akfin_taxonomic_classification_description,sentence,"Mirror of GAP_PRODUCTS.TAXONOMIC_CLASSIFICATION, subsetting for SURVEY_SPECIES = 1 includes taxonomic classification information accepted by the AFSC GAP bottom trawl survey."
+akfin_taxonomic_groups_description,sentence,Mirror of GAP_PRODUCTS.TAXON_GROUPS.
+foss_catch_description,sentence,Positive catch and effort from GAP_PRODUCTS.CPUE with associated taxonomic confidence.
+foss_haul_description,sentence,Mirror of GAP_PRODUCTS.HAUL with additional year and survey data.
+foss_species_description,sentence,List of GAP SPECIES_CODE values with associated WORMS and ITIS database values.
+foss_survey_species_description,sentence,List of observed SPECIES_CODE values for each survey region.
+foss_taxon_group_description,sentence,This reference table will allow for easier searching and sorting of species in FOSS.

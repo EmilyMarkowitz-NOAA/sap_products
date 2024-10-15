@@ -1,0 +1,20 @@
+{
+  "hash": "6c039f699da8804d1c80c455ac03639a",
+  "result": {
+    "markdown": "---\ntitle: News\n---\n\n\n\n## News/change logs \n\n\n\n::: {.cell}\n\n:::\n\n\n\n -- [SAP_PRODUCTS ChangeLog (last produced on 2024-10-15), initial development & template](https://raw.githubusercontent.com/afsc-gap-products/gap_products/main/content/intro-news/2024-10-15.txt): Run completed by: Emily Markowitz (GAP)\n\n",
+    "supporting": [
+      "intro-news_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}
