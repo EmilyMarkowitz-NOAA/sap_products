@@ -61,22 +61,21 @@ temp_oracle_push <- function(x, table_name, channel, schema, metadata_column, ta
   cat("Finished.\n\n")
 }
 
-
 ## Query Oracle and write to csv in the temp folder
 metadata_table <- RODBC::sqlQuery(
   channel = channel_products, 
   query = "SELECT * FROM GAP_PRODUCTS.METADATA_TABLE")
 
 legal_disclaimer <- paste0("Tables are provided ", 
-                          gsub(pattern = "Groundfish Assessment Program (GAP)", 
-                               replacement = "Shellfish Assessment Program (SAP)", 
-                               x = metadata_table$METADATA_SENTENCE[metadata_table$METADATA_SENTENCE_NAME == "survey_institution"], 
-                               fixed = TRUE),
-                          metadata_table$METADATA_SENTENCE[metadata_table$METADATA_SENTENCE_NAME == "legal_restrict"],
-                          gsub(x = metadata_table$METADATA_SENTENCE[metadata_table$METADATA_SENTENCE_NAME == "github"],
-                               pattern = "https://github.com/afsc-gap-products/gap_products",
-                               replacement = link_repo)
-                          )
+                           gsub(pattern = "Groundfish Assessment Program (GAP)", 
+                                replacement = "Shellfish Assessment Program (SAP)", 
+                                x = metadata_table$METADATA_SENTENCE[metadata_table$METADATA_SENTENCE_NAME == "survey_institution"], 
+                                fixed = TRUE),
+                           metadata_table$METADATA_SENTENCE[metadata_table$METADATA_SENTENCE_NAME == "legal_restrict"],
+                           gsub(x = metadata_table$METADATA_SENTENCE[metadata_table$METADATA_SENTENCE_NAME == "github"],
+                                pattern = "https://github.com/afsc-gap-products/gap_products",
+                                replacement = link_repo)
+)
 
 
 metadata_column <- RODBC::sqlQuery(
@@ -124,10 +123,79 @@ temp_oracle_push(x = species_lookup,
                  table_metadata = paste0("Crab specific SPECIES_ID for crab ids. ", legal_disclaimer),
                  share_with_all_users = TRUE)
 
-## STOCK STRATUM lookups -------------------------------------------------------
+## DISTRICT AREA lookup table by stock, pull districts by stock specified ------
 
-# TOLEDO - why is this separate? I'm joining it with stratum_nstations because it doesn't seem to come up anywhere else - why have a seperate reference table for it if its only used here?
-# stratum_years <- read.csv("./temp/Tables/stratum_years.csv")  # TOLDEO - what... is this?
+# add lines to add LOAD_DATE column (in DD-Mon-YY; does this get updated??), write to .csv, and bundle with AKFIN products?
+# 'ebscrab_district.csv'
+# seems redundant - I think this could simply be combined into the AKFIN_STRATUM_GROUP0 
+# table (just add the "stock" column somehow)
+# and some districts here aren't represented in AKFIN_STRATUM_GROUP0 - that seems like a problem??
+
+# dist_stock_lookup0 <- data.frame(STOCK = c("BBRKC", 
+#                                            rep("PribRKC", 2),
+#                                            "NSRKC", "NorthRKC",
+#                                            rep("PribBKC", 2), 
+#                                            rep("StMattBKC", 2),
+#                                            "BKCNBS",
+#                                            rep("TannerW", 3),
+#                                            "TannerWNBS",
+#                                            "TannerE", 
+#                                            "TannerENBS",
+#                                            rep("Snow", 3), 
+#                                            "SnowNBS",
+#                                            rep("Hybrid", 3), 
+#                                            "HybridNBS",
+#                                            rep("Hair", 4), 
+#                                            "HairNBS",
+#                                            rep("Allstations", 10)),
+#                                  DISTRICT = c("Bristol Bay", 
+#                                               "Pribilof MTCA", "Pribilof Single",
+#                                               "Norton Sound", "Northern Unstratified",
+#                                               "Pribilof MTCA", "Pribilof Single",
+#                                               "St. Matthew MTCA", "St. Matthew Single",
+#                                               "NBS All",
+#                                               "Pribilof MTCA", "St. Matthew MTCA", "West 166",
+#                                               "NBS All",
+#                                               "East 166",
+#                                               "NBS All",
+#                                               "Pribilof MTCA", "Single", "St. Matthew MTCA",
+#                                               "NBS All",
+#                                               "Pribilof MTCA", "Single", "St. Matthew MTCA",
+#                                               "NBS All",
+#                                               "Bristol Bay", "Northern Unstratified", "Pribilof MTCA", "Pribilof Single",
+#                                               "NBS All",
+#                                               "Bristol Bay", "Northern Unstratified", "Pribilof MTCA","Pribilof Single",      
+#                                               "BKC Unstratified", "St. Matthew MTCA", "St. Matthew Single", "East 166",             
+#                                               "West 166", "Single")) 
+
+dist_lookup <- tibble(DISTRICT_ID = c(1:9),
+                      DISTRICT_CODE = c("166TO173", 
+                                        "ALL", 
+                                        "BB", 
+                                        "E166", 
+                                        "PRIB", 
+                                        "STMATT", 
+                                        "UNSTRAT", 
+                                        "W166", 
+                                        "NORTH"),
+                      DISTRICT_NAME = c("Between 166W and 173W",
+                                        "All Areas",
+                                        "Bristol Bay",
+                                        "East of 166",
+                                        "Pribilof Islands",
+                                        "St. Matthew",
+                                        "Unstratified",
+                                        "West of 166",
+                                        "Northern"),
+                      DISTRICT_COMMENTS = c("Exception area that lies between 166W and 173W, used for Bairdi only",
+                                            "Used for Opilio, which is evaluated for one area only. Added Bairdi 5/22/2015. Added hair crab 1/5/2016.",
+                                            "Bristol Bay area used for Red King Crab",
+                                            "Area East of 166 longitude, used for Bairdi only",
+                                            "Pribilof Islands district, used for multiple species",
+                                            "St. Matthew district, used for multiple species",
+                                            "Unstratified used for Blue King Crab outside of Pribilof and St. Matthew Districts",
+                                            "Area West of 166 longitude, used for Bairdi only",
+                                            "Northern district for Red King Crab and Korean Horsehair Crab"))
 
 stratum_nstations <- read.csv("./temp/Tables/stratum_nstations.csv") %>% # TOLDEO - what... is this?
   dplyr::left_join(read.csv("./temp/Tables/stratum_years.csv"), relationship = "many-to-many") %>% 
@@ -144,99 +212,84 @@ stratum_nstations <- read.csv("./temp/Tables/stratum_nstations.csv") %>% # TOLDE
     SPECIES_CODE == "opilio" ~  68580, 
     SPECIES_CODE == "rkc" ~  69322
   )) %>% 
-  dplyr::left_join(species_lookup %>% 
-                     dplyr::select(SPECIES_CODE) %>% 
-                     dplyr::mutate(AREA_ID = 1:nrow(species_lookup))) %>%  # simplistic, but maintains order and it seems that stratification is (at this point) solely based on species_code, though in the future could be species code and new survey design/districts?
+  # dplyr::left_join(species_lookup %>% 
+  #                    dplyr::select(SPECIES_CODE) %>% 
+  #                    dplyr::mutate(AREA_ID = 1:nrow(species_lookup))) %>%  # simplistic, but maintains order and it seems that stratification is (at this point) solely based on species_code, though in the future could be species code and new survey design/districts?
   dplyr::mutate(
-    AREA_ID = AREA_ID + 88000, # can be anything - GAP designs are 99###
-    AREA_KM2 = AREA_KM2/100) # toledo, just guessing that this is in hectares and converting it to km2
+    # AREA_ID = AREA_ID + 88000, # can be anything - GAP designs are 99###
+    AREA_KM2 = AREA_KM2/100) # TOLEDO, just guessing that this is in hectares and converting it to km2
 
-metadata_column <- metadata_column %>% 
-  dplyr::add_row(data.frame(colname = "DISTRICT", 
-                            colname_long = "Crab stock districts", 
-                            units = "text", 
-                            datatype = "VARCHAR2(255 BYTE)", 
-                            colname_desc = "Districts used to subset stock boundaries."))
-
-gapindex::upload_oracle(x = stratum_nstations, 
-                        table_name = "STRATUM_NSTATIONS", 
-                        channel = channel_ehm, 
-                        schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stratum_nstations)), 
-                        table_metadata = paste0("Number of stations for each stratum and other metadata. ", legal_disclaimer),
-                        share_with_all_users = TRUE)
-
-temp_oracle_push(x = stratum_nstations, 
-                 table_name = "STRATUM_NSTATIONS", 
-                 channel = channel_ehm, 
-                 schema = "markowitze", 
-                 metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stratum_nstations)), 
-                 table_metadata = paste0("Number of stations for each stratum and other metadata. ", legal_disclaimer),
-                 share_with_all_users = TRUE)
-
-# AKFIN_STRATUM_GROUP0
-
-AKFIN_STRATUM_GROUP0 <- stratum_nstations %>% 
+dist_stock_lookup <- read.csv(file = './temp/Tables/district_stratum_lookup.csv') %>% 
+  dplyr::select(-SPECIES_NAME)  %>% 
+  dplyr::rename(DISTRICT_ABBREV = DISTRICT_CODE, 
+                STRATUM_ABBREV = STRATUM_CODE) %>% 
+  dplyr::left_join(dist_lookup %>% 
+                     dplyr::rename(DISTRICT_ABBREV = DISTRICT_CODE, 
+                                   DISTRICT_CODE = DISTRICT_ID) ) %>% 
   dplyr::mutate(
-  # SURVEY_DEFINITION_ID = dplyr::case_when( # guessing on all of these
-  #   DISTRICT == "Pribilof MTCA" ~ 98,
-  #     DISTRICT == "St. Matthew MTCA" ~ 98,
-  #     DISTRICT == "West 166" ~ 98,
-  #     DISTRICT == "East 166" ~ 98,
-  #     DISTRICT == "BKC Unstratified" ~ 98,
-  #     DISTRICT == "Pribilof Single" ~ 98,
-  #     DISTRICT == "St. Matthew Single" ~ 98,
-  #     DISTRICT == "Northern Unstratified" ~ 143,
-  #     DISTRICT == "Bristol Bay" ~ 98,
-  #     DISTRICT == "Single" ~ 98,
-  #     DISTRICT == "Norton Sound" ~ 98,
-  #     DISTRICT == "NBS All" ~ 143
-  # ), 
-                # DESCRIPTION = paste0(SPECIES_CODE, " ", DISTRICT), 
-    SURVEY_DEFINITION_ID = NA, 
-                DESCRIPTION = paste0(SPECIES_CODE, " ", DISTRICT), 
-                STRATUM = as.numeric(as.factor(paste0(SPECIES_CODE, " ", DISTRICT)))) %>% 
-  dplyr::distinct() %>% 
-  dplyr::select(AREA_ID, SURVEY_DEFINITION_ID, DESIGN_YEAR, STRATUM, DESCRIPTION, SPECIES_CODE, DISTRICT) # should remove SPECIES_CODE, DISTRICT
+    SURVEY_DEFINITION_ID = dplyr::case_when(
+      DISTRICT_NAME %in% c("All Northern Bering Sea", "Northern") ~ 143, # TOLEDO - guessing
+      TRUE ~ 98
+    ), 
+    DISTRICT_CODE = dplyr::case_when(
+    !is.na(DISTRICT_CODE) ~ DISTRICT_CODE, 
+    DISTRICT_ABBREV == "NS" ~ 10, # made up
+    DISTRICT_ABBREV == "NBS" ~ 880002, # matches with GAP stuff, though may be the same as our 99902 
+    DISTRICT_ABBREV == "EBS" ~ 880000 # matches with GAP stuff, though may be the same as our 99900 ro 99901
+  )) 
 
-# AKFIN_STRATUM_GROUP0 %>% dplyr::select(STRATUM, SPECIES_CODE, DISTRICT) %>% dplyr::distinct()
+dist_stock_lookup <- dist_stock_lookup %>% 
+  dplyr::left_join(dist_stock_lookup %>% # assign STRATUM #s - TOLEDO, I cant tell if these exist already
+                     dplyr::select(STRATUM_ABBREV) %>% 
+                     dplyr::distinct() %>% 
+                     dplyr::mutate(STRATUM_CODE = 100 + as.numeric(factor(STRATUM_ABBREV)))) # +100 to distinguish it from districts, make them unique
 
-gapindex::upload_oracle(x = AKFIN_STRATUM_GROUP0, 
-                        table_name = "XAKFIN_STRATUM_GROUP0", 
-                        channel = channel_ehm, 
-                        schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP0)), 
-                        table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
-                                                legal_disclaimer),
-                        share_with_all_users = TRUE)
+dist_stock_lookup <- dist_stock_lookup %>% 
+  dplyr::left_join(stratum_nstations %>% 
+                     dplyr::rename(DISTRICT_NAME = DISTRICT, 
+                                   DISTRICT_AREA_KM2 = AREA_KM2, 
+                                   DISTRICT_DESIGN_YEAR = DESIGN_YEAR) %>% 
+                     dplyr::mutate(STRATUM_DESIGN_YEAR = 1975)) # TOLEDO - may not be right, but works for now
 
-temp_oracle_push(x = AKFIN_STRATUM_GROUP0, 
-                 table_name = "XAKFIN_STRATUM_GROUP0", 
-                 channel = channel_ehm, 
-                 schema = "markowitze", 
-                 metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP0)), 
-                 table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
-                                         legal_disclaimer),
-                 share_with_all_users = TRUE)
+### AKFIN_AREA -----------------------------------------------------------------
 
-# AKFIN_AREA
+AKFIN_AREA <- dplyr::bind_rows(
+  dist_stock_lookup %>% 
+    dplyr::rename(AREA_NAME = STRATUM_NAME,
+                  AREA_ID = STRATUM_CODE, 
+                  DESIGN_YEAR = STRATUM_DESIGN_YEAR) %>% 
+    dplyr::mutate(AREA_TYPE = "STRATUM", 
+                  DESCRIPTION = paste0(STRATUM_ABBREV)) %>% 
+    dplyr::select(-dplyr::starts_with("DISTRICT_"), -STRATUM_ABBREV) %>% 
+    dplyr::distinct(), 
+  dist_stock_lookup %>% 
+    dplyr::rename(AREA_NAME = DISTRICT_NAME, 
+                  AREA_ID = DISTRICT_CODE, 
+                  AREA_KM2 = DISTRICT_AREA_KM2, 
+                  DESIGN_YEAR = DISTRICT_DESIGN_YEAR) %>% 
+    dplyr::mutate(AREA_TYPE = "DISTRICT", 
+                  DESCRIPTION = paste0(DISTRICT_ABBREV, ifelse(is.na(DISTRICT_COMMENTS), "", paste0(": ", DISTRICT_COMMENTS))))  %>% 
+    dplyr::select(-dplyr::starts_with("STRATUM_"), -DISTRICT_ABBREV, -DISTRICT_COMMENTS) %>% 
+    dplyr::distinct() ) %>% 
+  dplyr::mutate(
+    DEPTH_MIN_M = NA, 
+    DEPTH_MAX_M = NA) #%>% 
+  # dplyr::select(-DESCRIPTION)
+# N_COUNT is here, but I don't really understand it...
 
-AKFIN_AREA <- stratum_nstations %>% 
-  dplyr::mutate(SURVEY_DEFINITION_ID = NA, 
-                AREA_TYPE = "CRAB_STOCK", 
-                DESCRIPTION = paste0(SPECIES_CODE, " ", DISTRICT), 
-                DEPTH_M_MIN = NA, 
-                DEPTH_M_MAX = NA) %>% 
-  dplyr::select(SURVEY_DEFINITION_ID, DESIGN_YEAR, AREA_ID, AREA_TYPE, 
-                AREA_NAME = DISTRICT, 
-                DESCRIPTION, AREA_KM2, DEPTH_M_MIN, DEPTH_M_MAX) %>% 
-  dplyr::distinct()
+# Removing non-breaking space characters in R
+# for (i in 1:ncol(AKFIN_AREA)) {
+#   AKFIN_AREA[,i] <- gsub("[^ -~]+", "", AKFIN_AREA[,i])
+# }
 
 gapindex::upload_oracle(x = AKFIN_AREA, 
                         table_name = "AKFIN_AREA", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_AREA)), 
+                        metadata_column = metadata_column %>% 
+                          # dplyr::mutate(datatype = ifelse(datatype == "VARCHAR2(4000 BYTE)", "CLOB", datatype)) %>% 
+                          # dplyr::mutate(datatype = ifelse(datatype == "VARCHAR2(4000 BYTE)", "VARCHAR2(4000 CHAR)", datatype)) %>%
+                          dplyr::filter(colname %in% names(AKFIN_AREA)),  
                         table_metadata = paste0("Lookup table for which area are contained within a given AREA_ID for each DESIGN_YEAR. This table can be used in tandom with the GAP_PRODCUTS.STARTUM_GROUPS or AKFIN_STARTUM_GROUPS tables. ", 
                                                 legal_disclaimer),
                         share_with_all_users = TRUE)  
@@ -249,6 +302,165 @@ temp_oracle_push(x = AKFIN_AREA,
                  table_metadata = paste0("Lookup table for which area are contained within a given AREA_ID for each DESIGN_YEAR. This table can be used in tandom with the GAP_PRODCUTS.STARTUM_GROUPS or AKFIN_STARTUM_GROUPS tables. ", 
                                          legal_disclaimer),
                  share_with_all_users = TRUE)
+
+### AKFIN_STRATUM_GROUP --------------------------------------------------------
+
+AKFIN_STRATUM_GROUP <- dist_stock_lookup %>% 
+  dplyr::select(SPECIES_CODE, AREA_ID = DISTRICT_CODE, STRATUM = STRATUM_CODE, DESIGN_YEAR = DISTRICT_DESIGN_YEAR) %>% 
+  dplyr::distinct()
+
+gapindex::upload_oracle(x = AKFIN_STRATUM_GROUP, 
+                        table_name = "AKFIN_STRATUM_GROUP", 
+                        channel = channel_ehm, 
+                        schema = "markowitze", 
+                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP)), 
+                        table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
+                                                legal_disclaimer),
+                        share_with_all_users = TRUE)
+
+# SURVEY_YEAR ------------------------------------------------------------------
+
+# SURVEY_YEAR <- read.csv("./temp/Tables/stratum_years.csv")
+AKFIN_SURVEY_YEAR <- AKFIN_AREA %>% 
+  dplyr::filter(AREA_TYPE == "DISTRICT") %>%
+  dplyr::select(SURVEY_DEFINITION_ID, DESIGN_YEAR) %>% 
+  dplyr::distinct() %>% 
+  dplyr::mutate(YEAR = DESIGN_YEAR) # could be important later in the survey dev and is important for processing through gapindex
+
+gapindex::upload_oracle(x = AKFIN_SURVEY_YEAR, 
+                        table_name = "AKFIN_SURVEY_YEAR", 
+                        channel = channel_ehm, 
+                        schema = "markowitze", 
+                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_SURVEY_YEAR)), 
+                        table_metadata = paste0("Lookup table for DESIGN_YEAR should be used for which survey YEAR. This table can be used in tandom with the GAP_PRODCUTS.SURVEY_YEAR or AKFIN_SURVEY_YEAR tables. ", 
+                                                legal_disclaimer),
+                        share_with_all_users = TRUE)
+
+## STOCK STRATUM lookups -------------------------------------------------------
+
+# # TOLEDO - why is this separate? I'm joining it with stratum_nstations because it doesn't seem to come up anywhere else - why have a seperate reference table for it if its only used here?
+# # stratum_years <- read.csv("./temp/Tables/stratum_years.csv")  # TOLDEO - what... is this?
+# 
+# stratum_nstations <- read.csv("./temp/Tables/stratum_nstations.csv") %>% # TOLDEO - what... is this?
+#   dplyr::left_join(read.csv("./temp/Tables/stratum_years.csv"), relationship = "many-to-many") %>% 
+#   dplyr::rename(SPECIES_CODE = SPECIES, 
+#                 N_COUNT = N_STATIONS, # is this what this is refering to??? 
+#                 # AREA_ID = YEAR_BLOCK_ID, 
+#                 AREA_KM2 = TOTAL_AREA, 
+#                 DESIGN_YEAR = SURVEY_YEAR) %>% 
+#   dplyr::mutate(    SPECIES_CODE = dplyr::case_when(
+#     SPECIES_CODE == "bairdi" ~  68560, 
+#     SPECIES_CODE == "bkc" ~  69323, 
+#     SPECIES_CODE == "ei" ~  69400, 
+#     SPECIES_CODE == "hybrid" ~  68590, 
+#     SPECIES_CODE == "opilio" ~  68580, 
+#     SPECIES_CODE == "rkc" ~  69322
+#   )) %>% 
+#   dplyr::left_join(species_lookup %>% 
+#                      dplyr::select(SPECIES_CODE) %>% 
+#                      dplyr::mutate(AREA_ID = 1:nrow(species_lookup))) %>%  # simplistic, but maintains order and it seems that stratification is (at this point) solely based on species_code, though in the future could be species code and new survey design/districts?
+#   dplyr::mutate(
+#     AREA_ID = AREA_ID + 88000, # can be anything - GAP designs are 99###
+#     AREA_KM2 = AREA_KM2/100) # toledo, just guessing that this is in hectares and converting it to km2
+# 
+# metadata_column <- metadata_column %>% 
+#   dplyr::add_row(data.frame(colname = "DISTRICT", 
+#                             colname_long = "Crab stock districts", 
+#                             units = "text", 
+#                             datatype = "VARCHAR2(255 BYTE)", 
+#                             colname_desc = "Districts used to subset stock boundaries."))
+# 
+# gapindex::upload_oracle(x = stratum_nstations, 
+#                         table_name = "STRATUM_NSTATIONS", 
+#                         channel = channel_ehm, 
+#                         schema = "markowitze", 
+#                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stratum_nstations)), 
+#                         table_metadata = paste0("Number of stations for each stratum and other metadata. ", legal_disclaimer),
+#                         share_with_all_users = TRUE)
+# 
+# temp_oracle_push(x = stratum_nstations, 
+#                  table_name = "STRATUM_NSTATIONS", 
+#                  channel = channel_ehm, 
+#                  schema = "markowitze", 
+#                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stratum_nstations)), 
+#                  table_metadata = paste0("Number of stations for each stratum and other metadata. ", legal_disclaimer),
+#                  share_with_all_users = TRUE)
+
+# AKFIN_STRATUM_GROUP0
+
+# AKFIN_STRATUM_GROUP0 <- stratum_nstations %>% 
+#   dplyr::mutate(
+#     # SURVEY_DEFINITION_ID = dplyr::case_when( # guessing on all of these
+#     #   DISTRICT == "Pribilof MTCA" ~ 98,
+#     #     DISTRICT == "St. Matthew MTCA" ~ 98,
+#     #     DISTRICT == "West 166" ~ 98,
+#     #     DISTRICT == "East 166" ~ 98,
+#     #     DISTRICT == "BKC Unstratified" ~ 98,
+#     #     DISTRICT == "Pribilof Single" ~ 98,
+#     #     DISTRICT == "St. Matthew Single" ~ 98,
+#     #     DISTRICT == "Northern Unstratified" ~ 143,
+#     #     DISTRICT == "Bristol Bay" ~ 98,
+#     #     DISTRICT == "Single" ~ 98,
+#     #     DISTRICT == "Norton Sound" ~ 98,
+#     #     DISTRICT == "NBS All" ~ 143
+#     # ), 
+#     # DESCRIPTION = paste0(SPECIES_CODE, " ", DISTRICT), 
+#     SURVEY_DEFINITION_ID = NA, 
+#     DESCRIPTION = paste0(SPECIES_CODE, " ", DISTRICT), 
+#     STRATUM = as.numeric(as.factor(paste0(SPECIES_CODE, " ", DISTRICT)))) %>% 
+#   dplyr::distinct() %>% 
+#   dplyr::select(AREA_ID, SURVEY_DEFINITION_ID, DESIGN_YEAR, STRATUM, DESCRIPTION, SPECIES_CODE, DISTRICT) # should remove SPECIES_CODE, DISTRICT
+# 
+# # AKFIN_STRATUM_GROUP0 %>% dplyr::select(STRATUM, SPECIES_CODE, DISTRICT) %>% dplyr::distinct()
+# 
+# gapindex::upload_oracle(x = AKFIN_STRATUM_GROUP0, 
+#                         table_name = "XAKFIN_STRATUM_GROUP0", 
+#                         channel = channel_ehm, 
+#                         schema = "markowitze", 
+#                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP0)), 
+#                         table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
+#                                                 legal_disclaimer),
+#                         share_with_all_users = TRUE)
+# 
+# temp_oracle_push(x = AKFIN_STRATUM_GROUP0, 
+#                  table_name = "XAKFIN_STRATUM_GROUP0", 
+#                  channel = channel_ehm, 
+#                  schema = "markowitze", 
+#                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP0)), 
+#                  table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
+#                                          legal_disclaimer),
+#                  share_with_all_users = TRUE)
+# 
+# # AKFIN_AREA
+# 
+# AKFIN_AREA <- stratum_nstations %>% 
+#   dplyr::mutate(SURVEY_DEFINITION_ID = NA, 
+#                 AREA_TYPE = "CRAB_STOCK", 
+#                 DESCRIPTION = paste0(SPECIES_CODE, " ", DISTRICT), 
+#                 DEPTH_M_MIN = NA, 
+#                 DEPTH_M_MAX = NA) %>% 
+#   dplyr::select(SURVEY_DEFINITION_ID, DESIGN_YEAR, AREA_ID, AREA_TYPE, 
+#                 AREA_NAME = DISTRICT, 
+#                 DESCRIPTION, AREA_KM2, DEPTH_M_MIN, DEPTH_M_MAX) %>% 
+#   dplyr::distinct()
+# 
+# gapindex::upload_oracle(x = AKFIN_AREA, 
+#                         table_name = "AKFIN_AREA", 
+#                         channel = channel_ehm, 
+#                         schema = "markowitze", 
+#                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_AREA)), 
+#                         table_metadata = paste0("Lookup table for which area are contained within a given AREA_ID for each DESIGN_YEAR. This table can be used in tandom with the GAP_PRODCUTS.STARTUM_GROUPS or AKFIN_STARTUM_GROUPS tables. ", 
+#                                                 legal_disclaimer),
+#                         share_with_all_users = TRUE)  
+# 
+# temp_oracle_push(x = AKFIN_AREA, 
+#                  table_name = "AKFIN_AREA", 
+#                  channel = channel_ehm, 
+#                  schema = "markowitze", 
+#                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_AREA)), 
+#                  table_metadata = paste0("Lookup table for which area are contained within a given AREA_ID for each DESIGN_YEAR. This table can be used in tandom with the GAP_PRODCUTS.STARTUM_GROUPS or AKFIN_STARTUM_GROUPS tables. ", 
+#                                          legal_disclaimer),
+#                  share_with_all_users = TRUE)
 
 ## STOCK STATIONS lookups ------------------------------------------------------
 
@@ -263,8 +475,8 @@ ai <- akgfmaps::get_base_layers(select.region = "ai")$survey.grid
 # bbs <- akgfmaps::get_base_layers(select.region = "ebs.slope")$survey.grid # doesn't exist
 
 station <- data.frame(STATION = ebs$STATIONID,
-           # TYPE = "STANDARD",
-           SURVEY_DEFINITION_ID = 98) %>%
+                      # TYPE = "STANDARD",
+                      SURVEY_DEFINITION_ID = 98) %>%
   dplyr::bind_rows(data.frame(STATION = ebs_c$STATIONID[!(ebs_c$STATIONID %in% ebs$STATIONID)],
                               # TYPE = "CORNER",
                               SURVEY_DEFINITION_ID = 98)) %>%
@@ -283,26 +495,26 @@ station <- data.frame(STATION = ebs$STATIONID,
 # station <- station %>%
 #   dplyr::right_join(old_station, by = c("STATION", "SURVEY_DEFINITION_ID"))
 
-station_gap <- RODBC::sqlQuery(
-  channel = channel_products, 
-  query = "SELECT * FROM GAP_PRODUCTS.OLD_STATION") %>% 
-  dplyr::select(STRATUM, STATION, SURVEY_DEFINITION_ID = SRVY, DESIGN_YEAR) %>% 
-  dplyr::mutate(
-    SURVEY_DEFINITION_ID = dplyr::case_when(
-      SURVEY_DEFINITION_ID == "GOA" ~ 47, 
-      SURVEY_DEFINITION_ID == "AI" ~ 52, 
-      SURVEY_DEFINITION_ID == "EBS" ~ 98, 
-      SURVEY_DEFINITION_ID == "NBS" ~ 143, 
-      SURVEY_DEFINITION_ID == "BSS" ~ 78, 
-  ), 
-  AREA_ID = dplyr::case_when(
-    SURVEY_DEFINITION_ID == "47" ~ 99903, 
-    SURVEY_DEFINITION_ID == "52" ~ 99904, 
-    SURVEY_DEFINITION_ID == "98" ~ 99900, 
-    SURVEY_DEFINITION_ID == "143" ~ 99902, 
-    SURVEY_DEFINITION_ID == "78" ~ 99905, 
-  ), 
-  STATION_TYPE = "STANDARD") # sort of true
+# station_gap <- RODBC::sqlQuery(
+#   channel = channel_products, 
+#   query = "SELECT * FROM GAP_PRODUCTS.OLD_STATION") %>% 
+#   dplyr::select(STRATUM, STATION, SURVEY_DEFINITION_ID = SRVY, DESIGN_YEAR) %>% 
+#   dplyr::mutate(
+#     SURVEY_DEFINITION_ID = dplyr::case_when(
+#       SURVEY_DEFINITION_ID == "GOA" ~ 47, 
+#       SURVEY_DEFINITION_ID == "AI" ~ 52, 
+#       SURVEY_DEFINITION_ID == "EBS" ~ 98, 
+#       SURVEY_DEFINITION_ID == "NBS" ~ 143, 
+#       SURVEY_DEFINITION_ID == "BSS" ~ 78, 
+#     ), 
+#     AREA_ID = dplyr::case_when(
+#       SURVEY_DEFINITION_ID == "47" ~ 99903, 
+#       SURVEY_DEFINITION_ID == "52" ~ 99904, 
+#       SURVEY_DEFINITION_ID == "98" ~ 99900, 
+#       SURVEY_DEFINITION_ID == "143" ~ 99902, 
+#       SURVEY_DEFINITION_ID == "78" ~ 99905, 
+#     ), 
+#     STATION_TYPE = "STANDARD") # sort of true
 
 stock_stations_lookup <- 
   read.csv("./temp/Tables/stock_stations_lookup.csv") %>% 
@@ -315,7 +527,7 @@ stock_stations_lookup <-
                 # DESCRIPTION = DISTRICT, 
                 STATION_TYPE = TYPE) %>%
   dplyr::mutate(
-      SPECIES_CODE = dplyr::case_when(
+    SPECIES_CODE = dplyr::case_when(
       SPECIES_CODE == "bairdi" ~  68560, 
       SPECIES_CODE == "bkc" ~  69323, 
       SPECIES_CODE == "ei" ~  69400, 
@@ -323,15 +535,17 @@ stock_stations_lookup <-
       SPECIES_CODE == "opilio" ~  68580, 
       SPECIES_CODE == "rkc" ~  69322
     ), 
-  STATION_TYPE = toupper(STATION_TYPE), 
-  DESIGN_YEAR = 1970) %>% # I think?
+    STATION_TYPE = toupper(STATION_TYPE), 
+    DESIGN_YEAR = 1975) %>% # I think?
   dplyr::left_join(station %>% dplyr::select(STATION, SURVEY_DEFINITION_ID)) %>% # station are unique in EBS, NBS, and BSS
-  dplyr::left_join(AKFIN_STRATUM_GROUP0 %>% 
-                     dplyr::select(-DESIGN_YEAR, -SURVEY_DEFINITION_ID) %>% 
-                     dplyr::distinct()) %>% 
+  dplyr::left_join(AKFIN_STRATUM_GROUP %>% 
+                     dplyr::select(-DESIGN_YEAR) %>% # , -SURVEY_DEFINITION_ID
+                     dplyr::distinct(), 
+                   relationship = "many-to-many") %>% 
   dplyr::bind_rows(station) %>% # GAP content
   dplyr::mutate(SURVEY_DEFINITION_ID = ifelse(is.na(SURVEY_DEFINITION_ID), 98, SURVEY_DEFINITION_ID) ) %>% #  == "MISC"
-  dplyr::select(SURVEY_DEFINITION_ID, AREA_ID, STRATUM, STATION, STATION_TYPE, LONGITUDE_DD, LATITUDE_DD, DESIGN_YEAR) # , DISTRICT, SPECIES_CODE
+  dplyr::select(SURVEY_DEFINITION_ID, AREA_ID, STRATUM, STATION, STATION_TYPE, LONGITUDE_DD, LATITUDE_DD, DESIGN_YEAR) %>% # , DISTRICT, SPECIES_CODE
+  dplyr::arrange(desc(STATION))
 
 metadata_column <- metadata_column %>% 
   dplyr::add_row(data.frame(colname = "STATION_TYPE", 
@@ -393,178 +607,70 @@ stock_lookup <- tibble(SPECIES = c(rep("rkc", 4),
     )) %>% 
   dplyr::select(SPECIES_CODE, STOCK)
 
-gapindex::upload_oracle(x = stock_lookup, 
-                        table_name = "XSTOCK", 
-                        channel = channel_ehm, 
-                        schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stock_lookup)), 
-                        table_metadata = paste0("Stock district lookup table. ", legal_disclaimer),
-                        share_with_all_users = TRUE)
-
-temp_oracle_push(x = stock_lookup, 
-                 table_name = "XSTOCK", 
-                 channel = channel_ehm, 
-                 schema = "markowitze", 
-                 metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stock_lookup)), 
-                 table_metadata = paste0("Stock district lookup table. ", legal_disclaimer),
-                 share_with_all_users = TRUE)
-
-## DISTRICT AREA lookup table by stock, pull districts by stock specified --------------------------------------
-
-# seems redundant - I think this could simply be combined into the AKFIN_STRATUM_GROUP0 table (just add the "stock" column somehow)
-# and some districts here aren't represented in AKFIN_STRATUM_GROUP0 - that seems like a problem??
-
-dist_stock_lookup <- read.csv(file = './temp/Tables/district_stratum_lookup.csv') %>% 
-  dplyr::mutate(SPECIES_NAME = gsub(x = SPECIES_NAME, pattern = "\\xa0", replacement = " ", fixed = TRUE), 
-                DISTRICT_NAME = gsub(x = DISTRICT_NAME, pattern = "\\xa0", replacement = " ", fixed = TRUE), 
-                STRATUM_NAME = gsub(x = STRATUM_NAME, pattern = "\\xa0", replacement = " ", fixed = TRUE))
+# gapindex::upload_oracle(x = stock_lookup, 
+#                         table_name = "XSTOCK", 
+#                         channel = channel_ehm, 
+#                         schema = "markowitze", 
+#                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stock_lookup)), 
+#                         table_metadata = paste0("Stock district lookup table. ", legal_disclaimer),
+#                         share_with_all_users = TRUE)
+# 
+# temp_oracle_push(x = stock_lookup, 
+#                  table_name = "XSTOCK", 
+#                  channel = channel_ehm, 
+#                  schema = "markowitze", 
+#                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stock_lookup)), 
+#                  table_metadata = paste0("Stock district lookup table. ", legal_disclaimer),
+#                  share_with_all_users = TRUE)
 
 
-dist_stock_lookup <- data.frame(STOCK = c("BBRKC", 
-                                          rep("PribRKC", 2),
-                                          "NSRKC", "NorthRKC",
-                                          rep("PribBKC", 2), 
-                                          rep("StMattBKC", 2),
-                                          "BKCNBS",
-                                          rep("TannerW", 3),
-                                          "TannerWNBS",
-                                          "TannerE", 
-                                          "TannerENBS",
-                                          rep("Snow", 3), 
-                                          "SnowNBS",
-                                          rep("Hybrid", 3), 
-                                          "HybridNBS",
-                                          rep("Hair", 4), 
-                                          "HairNBS",
-                                          rep("Allstations", 10)),
-                                DISTRICT = c("Bristol Bay", 
-                                             "Pribilof MTCA", "Pribilof Single",
-                                             "Norton Sound", "Northern Unstratified",
-                                             "Pribilof MTCA", "Pribilof Single",
-                                             "St. Matthew MTCA", "St. Matthew Single",
-                                             "NBS All",
-                                             "Pribilof MTCA", "St. Matthew MTCA", "West 166",
-                                             "NBS All",
-                                             "East 166",
-                                             "NBS All",
-                                             "Pribilof MTCA", "Single", "St. Matthew MTCA",
-                                             "NBS All",
-                                             "Pribilof MTCA", "Single", "St. Matthew MTCA",
-                                             "NBS All",
-                                             "Bristol Bay", "Northern Unstratified", "Pribilof MTCA", "Pribilof Single",
-                                             "NBS All",
-                                             "Bristol Bay", "Northern Unstratified", "Pribilof MTCA","Pribilof Single",      
-                                             "BKC Unstratified", "St. Matthew MTCA", "St. Matthew Single", "East 166",             
-                                             "West 166", "Single")) %>% 
-  dplyr::left_join(stock_lookup) %>% 
-  dplyr::left_join(AKFIN_STRATUM_GROUP0 %>% 
-                     dplyr::select(STRATUM, SPECIES_CODE, DISTRICT, AREA_ID) %>% 
-                     dplyr::distinct())
-
-## DISTRICT lookup table ------------------------------------------------------------ 
-dist_lookup <- tibble(DISTRICT_ID = c(1:9),
-                      DISTRICT_CODE = c("166TO173", 
-                                        "ALL", 
-                                        "BB", 
-                                        "E166", 
-                                        "PRIB", 
-                                        "STMATT", 
-                                        "UNSTRAT", 
-                                        "W166", 
-                                        "NORTH"),
-                      DISTRICT_NAME = c("Between 166W and 173W",
-                                        "All Areas",
-                                        "Bristol Bay",
-                                        "East of 166",
-                                        "Pribilof Islands",
-                                        "St. Matthew",
-                                        "Unstratified",
-                                        "West of 166",
-                                        "Northern"),
-                      DISTRICT_COMMENTS = c("Exception area that lies between 166W and 173W, used for Bairdi only",
-                                            "Used for Opilio, which is evaluated for one area only. Added Bairdi 5/22/2015. Added hair crab 1/5/2016.",
-                                            "Bristol Bay area used for Red King Crab",
-                                            "Area East of 166 longitude, used for Bairdi only",
-                                            "Pribilof Islands district, used for multiple species",
-                                            "St. Matthew district, used for multiple species",
-                                            "Unstratified used for Blue King Crab outside of Pribilof and St. Matthew Districts",
-                                            "Area West of 166 longitude, used for Bairdi only",
-                                            "Northern district for Red King Crab and Korean Horsehair Crab"))
-
-# add lines to add LOAD_DATE column (in DD-Mon-YY; does this get updated??), write to .csv, and bundle with AKFIN products?
-# 'ebscrab_district.csv'
-
-
-metadata_column <- metadata_column %>% 
-  dplyr::add_row(data.frame(colname = "STOCK", 
-                            colname_long = "Abbreviated name of stock males", 
-                            units = "text", 
-                            datatype = "VARCHAR2(255 BYTE)", 
-                            colname_desc = "Abbreviated name of stock."))
-
-gapindex::upload_oracle(x = dist_stock_lookup, 
-                        table_name = "STOCK_DISTRICT", 
-                        channel = channel_ehm, 
-                        schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(dist_stock_lookup)), 
-                        table_metadata = paste0("Stock district lookup table. ", legal_disclaimer),
-                        share_with_all_users = TRUE)
-
-temp_oracle_push(x = dist_stock_lookup, 
-                        table_name = "STOCK_DISTRICT", 
-                        channel = channel_ehm, 
-                        schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(dist_stock_lookup)), 
-                        table_metadata = paste0("Stock district lookup table. ", legal_disclaimer),
-                        share_with_all_users = TRUE)
-
-# AKFIN_STRATUM_GROUP0 repise ---------------------------------------------------
-
-# Seems that there are some mismatches we need to combine
-
-AKFIN_STRATUM_GROUP <- AKFIN_STRATUM_GROUP0 %>% 
-  dplyr::ungroup() %>% 
-  dplyr::full_join(dist_stock_lookup) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::mutate(DESCRIPTION = paste0(STOCK, " ", DESCRIPTION)) %>% 
-  dplyr::select(-SURVEY_DEFINITION_ID) %>%
-  dplyr::left_join(stock_stations_lookup %>% 
-                     dplyr::select(AREA_ID, SURVEY_DEFINITION_ID, STRATUM) %>% 
-                     dplyr::distinct()) %>% 
-  dplyr::ungroup()  
-
-temp <- AKFIN_STRATUM_GROUP %>% 
-  dplyr::filter(is.na(AREA_ID)) %>% 
-  dplyr::distinct() %>% 
-  dplyr::mutate(STRATUM = (1:nrow(.))+max(AKFIN_STRATUM_GROUP$STRATUM, na.rm = TRUE), 
-                # STARTUM = STARTUM + ifelse(is.na(SPECIES_CODE), 100, 0), 
-                AREA_ID = STRATUM + 88000, 
-                DESIGN_YEAR = 1970)
-  
-AKFIN_STRATUM_GROUP <- dplyr::left_join(AKFIN_STRATUM_GROUP %>% 
-                                                            dplyr::filter(is.na(AREA_ID)) %>% 
-                                           dplyr::select(-AREA_ID, -STRATUM), 
-                                                          temp) %>%
-  dplyr::bind_rows(AKFIN_STRATUM_GROUP %>% 
-                     dplyr::filter(!is.na(AREA_ID)) )
-
-gapindex::upload_oracle(x = AKFIN_STRATUM_GROUP, 
-                        table_name = "AKFIN_STRATUM_GROUP", 
-                        channel = channel_ehm, 
-                        schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP)), 
-                        table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
-                                                legal_disclaimer),
-                        share_with_all_users = TRUE)
-
-temp_oracle_push(x = AKFIN_STRATUM_GROUP, 
-                 table_name = "AKFIN_STRATUM_GROUP", 
-                 channel = channel_ehm, 
-                 schema = "markowitze", 
-                 metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP)), 
-                 table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
-                                         legal_disclaimer),
-                 share_with_all_users = TRUE)
+# # AKFIN_STRATUM_GROUP0 repise ---------------------------------------------------
+# 
+# # Seems that there are some mismatches we need to combine
+# 
+# AKFIN_STRATUM_GROUP <- AKFIN_STRATUM_GROUP0 %>% 
+#   dplyr::ungroup() %>% 
+#   dplyr::full_join(dist_stock_lookup) %>% 
+#   dplyr::ungroup() %>% 
+#   dplyr::mutate(DESCRIPTION = paste0(STOCK, " ", DESCRIPTION)) %>% 
+#   dplyr::select(-SURVEY_DEFINITION_ID) %>%
+#   dplyr::left_join(stock_stations_lookup %>% 
+#                      dplyr::select(AREA_ID, SURVEY_DEFINITION_ID, STRATUM) %>% 
+#                      dplyr::distinct()) %>% 
+#   dplyr::ungroup()  
+# 
+# temp <- AKFIN_STRATUM_GROUP %>% 
+#   dplyr::filter(is.na(AREA_ID)) %>% 
+#   dplyr::distinct() %>% 
+#   dplyr::mutate(STRATUM = (1:nrow(.))+max(AKFIN_STRATUM_GROUP$STRATUM, na.rm = TRUE), 
+#                 # STARTUM = STARTUM + ifelse(is.na(SPECIES_CODE), 100, 0), 
+#                 AREA_ID = STRATUM + 88000, 
+#                 DESIGN_YEAR = 1975)
+# 
+# AKFIN_STRATUM_GROUP <- dplyr::left_join(AKFIN_STRATUM_GROUP %>% 
+#                                           dplyr::filter(is.na(AREA_ID)) %>% 
+#                                           dplyr::select(-AREA_ID, -STRATUM), 
+#                                         temp) %>%
+#   dplyr::bind_rows(AKFIN_STRATUM_GROUP %>% 
+#                      dplyr::filter(!is.na(AREA_ID)) )
+# 
+# gapindex::upload_oracle(x = AKFIN_STRATUM_GROUP, 
+#                         table_name = "AKFIN_STRATUM_GROUP", 
+#                         channel = channel_ehm, 
+#                         schema = "markowitze", 
+#                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP)), 
+#                         table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
+#                                                 legal_disclaimer),
+#                         share_with_all_users = TRUE)
+# 
+# temp_oracle_push(x = AKFIN_STRATUM_GROUP, 
+#                  table_name = "AKFIN_STRATUM_GROUP", 
+#                  channel = channel_ehm, 
+#                  schema = "markowitze", 
+#                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP)), 
+#                  table_metadata = paste0("Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. ", 
+#                                          legal_disclaimer),
+#                  share_with_all_users = TRUE)
 
 ## MALE CUTLINES lookup table --------------------------------------------------
 mat_lookup <- tibble(stock = c("BBRKC", "PribRKC", "PribBKC", "StMattBKC", "TannerE", "TannerW","Snow", "Hybrid", "Hair", "NorthRKC","NSRKC", "BKCNBS", "SnowNBS"),
@@ -573,15 +679,17 @@ mat_lookup <- tibble(stock = c("BBRKC", "PribRKC", "PribBKC", "StMattBKC", "Tann
                      recruit = c(134, 134, 134, 119, 124, 124, 101, 101, NA, 134, NA, NA, NA),
                      preferred = c(NA, NA, NA, NA, 125, 125, 102, 102, NA, NA, NA, NA, 102),
                      title = c("Bristol Bay Red King Crab", "Pribilof Islands Red King Crab", "Pribilof Islands Blue King Crab",
-                              "St. Matthew Island Blue King Crab", "Tanner Crab East", "Tanner Crab West", "Snow Crab", 
-                              "Hybrid Tanner-Snow Crab","Hair Crab","Northern District Red King Crab", "Norton Sound Red King Crab","Northern Bering Sea Blue King Crab","Northern Bering Sea Snow Crab")) %>% 
+                               "St. Matthew Island Blue King Crab", "Tanner Crab East", "Tanner Crab West", "Snow Crab", 
+                               "Hybrid Tanner-Snow Crab","Hair Crab","Northern District Red King Crab", "Norton Sound Red King Crab","Northern Bering Sea Blue King Crab","Northern Bering Sea Snow Crab")) %>% 
   dplyr::select(STOCK = stock, 
                 STOCK_LONG = title, 
                 LENGTH_MM_CUTLINE = cutline, # What does this mean?
                 LENGTH_MM_LEGAL = legal, 
                 LENGTH_MM_PREFERED = preferred, 
                 LENGTH_MM_RECRUIT = recruit) %>% 
-  dplyr::left_join(dist_stock_lookup)
+  dplyr::full_join(stock_lookup)
+  # dplyr::left_join(dist_stock_lookup)
+# TOLEDO - really needs DISTRICT, right?
 
 metadata_column <- metadata_column %>% 
   dplyr::add_row(data.frame(colname = "LENGTH_MM_PREFERED", 
@@ -608,8 +716,12 @@ metadata_column <- metadata_column %>%
                             colname_long = "Name of stock", 
                             units = "text", 
                             datatype = "VARCHAR2(255 BYTE)", 
-                            colname_desc = "Name of stock."))
-
+                            colname_desc = "Name of stock.")) %>% 
+  dplyr::add_row(data.frame(colname = "STOCK", 
+                            colname_long = "Abbreviated name of stock males", 
+                            units = "text", 
+                            datatype = "VARCHAR2(255 BYTE)", 
+                            colname_desc = "Abbreviated name of stock."))
 
 
 # ## CLUTCH CODES lookup table ------------------------------------------------------------ 
@@ -635,20 +747,13 @@ chela_param_lookup <- tibble(SPECIES = c("Bairdi",
   dplyr::select(-SPECIES) %>% 
   dplyr::rename(DESCRIPTION = NOTES)
 
-mat_lookup <- dplyr::left_join(mat_lookup, chela_param_lookup)
+mat_lookup0 <- dplyr::left_join(mat_lookup, chela_param_lookup) %>% 
+  dplyr::arrange(desc(STOCK))
 
-gapindex::upload_oracle(x = mat_lookup, 
+gapindex::upload_oracle(x = mat_lookup0, 
                         table_name = "STOCK_MATURITY_CUTOFF", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
-                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(mat_lookup)), 
+                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(mat_lookup0)), 
                         table_metadata = paste0("MALE cutlines lookup table", legal_disclaimer),
                         share_with_all_users = TRUE)
-
-temp_oracle_push(x = mat_lookup, 
-                 table_name = "STOCK_MATURITY_CUTOFF", 
-                 channel = channel_ehm, 
-                 schema = "markowitze", 
-                 metadata_column = metadata_column %>% dplyr::filter(colname %in% names(mat_lookup)), 
-                 table_metadata = paste0("MALE cutlines lookup table", legal_disclaimer),
-                 share_with_all_users = TRUE)

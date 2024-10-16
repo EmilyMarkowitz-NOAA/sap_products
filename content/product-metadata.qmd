@@ -9,7 +9,7 @@ title: Data description
 ```{r table-locations, eval = TRUE, echo = FALSE}
  # You can download all of the tables and save them locally. These are all of the new tables for you to look through:
 
-product_views <- RODBC::sqlQuery(
+product_views <- RODBC::sqlQuery( 
   channel = channel_ehm,
   query = "SELECT table_name 
 FROM all_tables

@@ -20,7 +20,7 @@ print("loading data")
 if (production) {
   haul_table <- read.csv("Y:/KOD_Survey/EBS Shelf/2024/Tech Memo/Data/haul_newtimeseries.csv")
 } else {
-  haul_table <- read.csv(here::here("Tables", "haul_table.csv"))
+  haul_table <- read.csv(here::here("temp/Tables", "haul_table.csv"))
 }
 
 ## Commented section = old R workflow iteration, going from tablet output .csv to EBSCRAB
@@ -56,13 +56,13 @@ if(ORACLE == TRUE){
   # - Keep in Data_Processing folder? and use fread?
   # - Or have an option somewhere (if(xx is TRUE)....) whether we want to connect to Oracle or work locally
   a <- RODBC::sqlQuery(channel, paste0("SELECT * FROM ", "EBSCRAB.EBSCRAB"))
-  write.csv(x = a, file = paste0(data_dir, "EBSCRAB.EBSCRAB.csv"), row.names = FALSE) # save locally for easier processing
+  write.csv(x = a, file = paste0(data_dir, "/EBSCRAB_EBSCRAB.csv"), row.names = FALSE) # save locally for easier processing
   
-  print("downloaded EBSCRAB.EBSCRAB")
+  print("downloaded EBSCRAB_EBSCRAB")
 }
 
 # Load EBSCRAB.EBSCRAB 
-ebscrab <- read.csv(paste0(data_dir, "EBSCRAB.EBSCRAB.csv")) #%>% filter(CRUISE == 202401)
+ebscrab <- read.csv(paste0(data_dir, "/EBSCRAB_EBSCRAB.csv")) #%>% filter(CRUISE == 202401)
 
 print("loaded EBSCRAB.EBSCRAB")
 
@@ -115,79 +115,80 @@ print("creating Specimen Table from updated EBSCRAB")
 
 # Reformat specimen data, calculate weight based on sex/size relationships, [ETC.] for OLD WORKFLOW CrabHaul files
 specimen_table <- ebscrab %>%
-                  right_join(., haul_table, by = c('HAULJOIN')) %>%
-                  dplyr::filter(c(is.na(MID_LATITUDE) & is.na(MID_LONGITUDE) & is.na(STATIONID)) == FALSE) %>% # bad/gear testing hauls will have NA
-                  # calculate weights (based on length/width regression)
-                  ## **THIS COULD BE TIGHTENED UP - lookup table with covariates, ifelse for length vs. width based on spp**
-                  mutate(CALCULATED_WEIGHT = case_when(# BAIRDI
-                                                      (SPECIES_CODE == 68560 & SEX == 1) ~ (0.00027*(WIDTH)^3.022134), # male
-                                                      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.000441*(WIDTH)^2.898686), # mat female
-                                                      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000562*(WIDTH)^2.816928), # imm/barren female
-                                                      # OPILIO/HYBRID
-                                                      (SPECIES_CODE %in% c(68580, 68590) & SEX == 1) ~ (0.000267*(WIDTH)^3.097253), # male
-                                                      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.001158*(WIDTH)^2.708793), # mat female
-                                                      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.001047*(WIDTH)^2.708367), # imm/barren female
-                                                      # RKC
-                                                      (SPECIES_CODE == 69322 & SEX == 1) ~ (0.000403*(LENGTH)^3.141334), # male
-                                                      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.003593*(LENGTH)^2.666076), # mat female
-                                                      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000408*(LENGTH)^3.127956), # imm/barren female
-                                                      # BKC
-                                                      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE < 58.65) ~ (0.000508*(LENGTH)^3.106409), # S male
-                                                      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE > 58.65) ~ (0.000502*(LENGTH)^3.107158), # N male
-                                                      (SPECIES_CODE == 69323 & SEX == 2) ~ (0.02065*(LENGTH)^2.27), # female
-                                                      # EI
-                                                      (SPECIES_CODE == 69400 & SEX == 1) ~ (0.00071731*(LENGTH)^3.02), # male
-                                                      (SPECIES_CODE == 69400 & SEX == 2) ~ (0.001194533*(LENGTH)^2.86), # female
-                                                      TRUE ~ 0), 
-                    CALCULATED_WEIGHT = format(CALCULATED_WEIGHT, scientific = F),
-                    CALCULATED_WEIGHT = as.numeric(CALCULATED_WEIGHT),
-                    # create 1mm size bins
-                    LENGTH_1MM = case_when(SPECIES_CODE %in% c(69322, 69323, 69400) ~ floor(LENGTH)),
-                    WIDTH_1MM = case_when(SPECIES_CODE %in% c(68560, 68580, 68590) ~ floor(WIDTH)),
-                    CALCULATED_WEIGHT_1MM = case_when(# BAIRDI
-                                                      (SPECIES_CODE == 68560 & SEX == 1) ~ (0.00027*(WIDTH_1MM)^3.022134), # male
-                                                      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.000441*(WIDTH_1MM)^2.898686), # mat female
-                                                      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000562*(WIDTH_1MM)^2.816928), # imm/barren female
-                                                      # OPILIO/HYBRID
-                                                      (SPECIES_CODE %in% c(68580, 68590) & SEX == 1) ~ (0.000267*(WIDTH_1MM)^3.097253), # male
-                                                      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.001158*(WIDTH_1MM)^2.708793), # mat female
-                                                      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.001047*(WIDTH_1MM)^2.708367), # imm/barren female
-                                                      # RKC
-                                                      (SPECIES_CODE == 69322 & SEX == 1) ~ (0.000403*(LENGTH_1MM)^3.141334), # male
-                                                      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.003593*(LENGTH_1MM)^2.666076), # mat female
-                                                      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000408*(LENGTH_1MM)^3.127956), # imm/barren female
-                                                      # BKC
-                                                      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE < 58.65) ~ (0.000508*(LENGTH_1MM)^3.106409), # S male
-                                                      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE > 58.65) ~ (0.000502*(LENGTH_1MM)^3.107158), # N male
-                                                      (SPECIES_CODE == 69323 & SEX == 2) ~ (0.02065*(LENGTH_1MM)^2.27), # female
-                                                      # EI
-                                                      (SPECIES_CODE == 69400 & SEX == 1) ~ (0.00071731*(LENGTH_1MM)^3.02), # male
-                                                      (SPECIES_CODE == 69400 & SEX == 2) ~ (0.001194533*(LENGTH_1MM)^2.86), # female 
-                                                      TRUE ~ 0), 
-                    CALCULATED_WEIGHT_1MM = format(CALCULATED_WEIGHT_1MM, scientific = F),
-                    CALCULATED_WEIGHT_1MM = as.numeric(CALCULATED_WEIGHT_1MM),
-                    # calculate area swept
-                    AREA_SWEPT = ((NET_WIDTH/1000) * DISTANCE_FISHED) * 0.29155335,
-                    #!! calculate start date and start hour
-                    START_DATE = as.Date(START_DATE, "%d-%b-%y"),
-                    START_HOUR = NA) %>% #to_char(start_time,'HH24MI')start_hour -- format(as.POSIXct(as.Date(specimen$START_TIME[6], "%d-%b-%y")), format = "%H%M")
-                    dplyr::select(!HAULJOIN) %>%
-                    filter(!(HAUL_TYPE == 17 & SPECIES_CODE != 69322)) %>%
-                    right_join(., haul_table) %>%
-                    dplyr::select(HAULJOIN, VESSEL, CRUISE, HAUL, HAUL_TYPE, PERFORMANCE, START_DATE, START_HOUR, DURATION,
-                                  DISTANCE_FISHED, NET_WIDTH, NET_MEASURED, NET_HEIGHT, MID_LATITUDE, MID_LONGITUDE, GIS_STATION,
-                                  GEAR_DEPTH, BOTTOM_DEPTH, SURFACE_TEMPERATURE, GEAR_TEMPERATURE, WIRE_LENGTH, GEAR, ACCESSORIES,
-                                  SUBSAMPLE, AREA_SWEPT, SPECIES_CODE, SEX, LENGTH, LENGTH_1MM, WIDTH, WIDTH_1MM, SHELL_CONDITION,
-                                  EGG_COLOR, EGG_CONDITION, CLUTCH_SIZE, MERUS_LENGTH, CHELA_HEIGHT, DISEASE_CODE, DISEASE_DORSAL,
-                                  DISEASE_VENTRAL, DISEASE_LEGS, CALCULATED_WEIGHT, CALCULATED_WEIGHT_1MM, WEIGHT, SAMPLING_FACTOR)
+  dplyr::right_join(., haul_table, by = c('HAULJOIN')) %>%
+  dplyr::filter(c(is.na(MID_LATITUDE) & is.na(MID_LONGITUDE) & is.na(STATIONID)) == FALSE) %>% # bad/gear testing hauls will have NA
+  # calculate weights (based on length/width regression)
+  ## **THIS COULD BE TIGHTENED UP - lookup table with covariates, ifelse for length vs. width based on spp**
+  dplyr::mutate(
+    CALCULATED_WEIGHT = case_when(# BAIRDI
+      (SPECIES_CODE == 68560 & SEX == 1) ~ (0.00027*(WIDTH)^3.022134), # male
+      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.000441*(WIDTH)^2.898686), # mat female
+      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000562*(WIDTH)^2.816928), # imm/barren female
+      # OPILIO/HYBRID
+      (SPECIES_CODE %in% c(68580, 68590) & SEX == 1) ~ (0.000267*(WIDTH)^3.097253), # male
+      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.001158*(WIDTH)^2.708793), # mat female
+      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.001047*(WIDTH)^2.708367), # imm/barren female
+      # RKC
+      (SPECIES_CODE == 69322 & SEX == 1) ~ (0.000403*(LENGTH)^3.141334), # male
+      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.003593*(LENGTH)^2.666076), # mat female
+      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000408*(LENGTH)^3.127956), # imm/barren female
+      # BKC
+      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE < 58.65) ~ (0.000508*(LENGTH)^3.106409), # S male
+      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE > 58.65) ~ (0.000502*(LENGTH)^3.107158), # N male
+      (SPECIES_CODE == 69323 & SEX == 2) ~ (0.02065*(LENGTH)^2.27), # female
+      # EI
+      (SPECIES_CODE == 69400 & SEX == 1) ~ (0.00071731*(LENGTH)^3.02), # male
+      (SPECIES_CODE == 69400 & SEX == 2) ~ (0.001194533*(LENGTH)^2.86), # female
+      TRUE ~ 0), 
+    CALCULATED_WEIGHT = format(CALCULATED_WEIGHT, scientific = F),
+    CALCULATED_WEIGHT = as.numeric(CALCULATED_WEIGHT),
+    # create 1mm size bins
+    LENGTH_1MM = case_when(SPECIES_CODE %in% c(69322, 69323, 69400) ~ floor(LENGTH)),
+    WIDTH_1MM = case_when(SPECIES_CODE %in% c(68560, 68580, 68590) ~ floor(WIDTH)),
+    CALCULATED_WEIGHT_1MM = case_when(# BAIRDI
+      (SPECIES_CODE == 68560 & SEX == 1) ~ (0.00027*(WIDTH_1MM)^3.022134), # male
+      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.000441*(WIDTH_1MM)^2.898686), # mat female
+      (SPECIES_CODE == 68560 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000562*(WIDTH_1MM)^2.816928), # imm/barren female
+      # OPILIO/HYBRID
+      (SPECIES_CODE %in% c(68580, 68590) & SEX == 1) ~ (0.000267*(WIDTH_1MM)^3.097253), # male
+      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.001158*(WIDTH_1MM)^2.708793), # mat female
+      (SPECIES_CODE %in% c(68580, 68590) & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.001047*(WIDTH_1MM)^2.708367), # imm/barren female
+      # RKC
+      (SPECIES_CODE == 69322 & SEX == 1) ~ (0.000403*(LENGTH_1MM)^3.141334), # male
+      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE > 1) ~ (0.003593*(LENGTH_1MM)^2.666076), # mat female
+      (SPECIES_CODE == 69322 & SEX == 2 & CLUTCH_SIZE <= 1) ~ (0.000408*(LENGTH_1MM)^3.127956), # imm/barren female
+      # BKC
+      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE < 58.65) ~ (0.000508*(LENGTH_1MM)^3.106409), # S male
+      (SPECIES_CODE == 69323 & SEX == 1 & MID_LATITUDE > 58.65) ~ (0.000502*(LENGTH_1MM)^3.107158), # N male
+      (SPECIES_CODE == 69323 & SEX == 2) ~ (0.02065*(LENGTH_1MM)^2.27), # female
+      # EI
+      (SPECIES_CODE == 69400 & SEX == 1) ~ (0.00071731*(LENGTH_1MM)^3.02), # male
+      (SPECIES_CODE == 69400 & SEX == 2) ~ (0.001194533*(LENGTH_1MM)^2.86), # female 
+      TRUE ~ 0), 
+    CALCULATED_WEIGHT_1MM = format(CALCULATED_WEIGHT_1MM, scientific = F),
+    CALCULATED_WEIGHT_1MM = as.numeric(CALCULATED_WEIGHT_1MM),
+    # calculate area swept
+    AREA_SWEPT = ((NET_WIDTH/1000) * DISTANCE_FISHED) * 0.29155335,
+    #!! calculate start date and start hour
+    START_DATE = as.Date(START_DATE, "%d-%b-%y"),
+    START_HOUR = NA) %>% #to_char(start_time,'HH24MI')start_hour -- format(as.POSIXct(as.Date(specimen$START_TIME[6], "%d-%b-%y")), format = "%H%M")
+  dplyr::select(!HAULJOIN) %>%
+  filter(!(HAUL_TYPE == 17 & SPECIES_CODE != 69322)) %>%
+  right_join(., haul_table) %>%
+  dplyr::select(HAULJOIN, VESSEL, CRUISE, HAUL, HAUL_TYPE, PERFORMANCE, START_DATE, START_HOUR, DURATION,
+                DISTANCE_FISHED, NET_WIDTH, NET_MEASURED, NET_HEIGHT, MID_LATITUDE, MID_LONGITUDE, GIS_STATION,
+                GEAR_DEPTH, BOTTOM_DEPTH, SURFACE_TEMPERATURE, GEAR_TEMPERATURE, WIRE_LENGTH, GEAR, ACCESSORIES,
+                SUBSAMPLE, AREA_SWEPT, SPECIES_CODE, SEX, LENGTH, LENGTH_1MM, WIDTH, WIDTH_1MM, SHELL_CONDITION,
+                EGG_COLOR, EGG_CONDITION, CLUTCH_SIZE, MERUS_LENGTH, CHELA_HEIGHT, DISEASE_CODE, DISEASE_DORSAL,
+                DISEASE_VENTRAL, DISEASE_LEGS, CALCULATED_WEIGHT, CALCULATED_WEIGHT_1MM, WEIGHT, SAMPLING_FACTOR)
 
 # NEW FORMAT: reworking from above -- don't include 0-catch stations....don't include haul info except for HAULJOIN
 specimen_table <- specimen_table %>% 
-            # mutate(SURVEY_YEAR = as.numeric(substr(CRUISE, 1, 4))) %>%
-            dplyr::select(HAULJOIN, SPECIES_CODE, SEX, LENGTH, LENGTH_1MM, WIDTH, WIDTH_1MM, SHELL_CONDITION,
-                          EGG_COLOR, EGG_CONDITION, CLUTCH_SIZE, MERUS_LENGTH, CHELA_HEIGHT, DISEASE_CODE, DISEASE_DORSAL,
-                          DISEASE_VENTRAL, DISEASE_LEGS, CALCULATED_WEIGHT, CALCULATED_WEIGHT_1MM, WEIGHT, SAMPLING_FACTOR)
-            
+  # mutate(SURVEY_YEAR = as.numeric(substr(CRUISE, 1, 4))) %>%
+  dplyr::select(HAULJOIN, SPECIES_CODE, SEX, LENGTH, LENGTH_1MM, WIDTH, WIDTH_1MM, SHELL_CONDITION,
+                EGG_COLOR, EGG_CONDITION, CLUTCH_SIZE, MERUS_LENGTH, CHELA_HEIGHT, DISEASE_CODE, DISEASE_DORSAL,
+                DISEASE_VENTRAL, DISEASE_LEGS, CALCULATED_WEIGHT, CALCULATED_WEIGHT_1MM, WEIGHT, SAMPLING_FACTOR)
+
 
 
 # ## OLD WORKFLOW: parse specimen table by species and save for Tech Memo and Oracle

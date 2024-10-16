@@ -124,7 +124,7 @@ print_table_metadata <- function(channel, locations, owner = "GAP_PRODUCTS") {
        WHERE TABLE_NAME IN ", gapindex::stitch_entries(locations)))
   
   ## Query all fields contained within each table in `locations`
-  if (grepl(pattern = "UID=GAP_PRODUCTS", x = channel, ignore.case = TRUE)) {
+  # if (grepl(pattern = "UID=GAP_PRODUCTS", x = channel, ignore.case = TRUE)) {
   b_columns <-
     RODBC::sqlQuery(
       channel = channel,
@@ -143,14 +143,15 @@ print_table_metadata <- function(channel, locations, owner = "GAP_PRODUCTS") {
           gapindex::stitch_entries(b$TABLE_NAME)
         )
     )
-  } else {
-    b_columns <- data.frame("TABLE_NAME" = b$TABLE_NAME, 
-                            "Column name from data"	= "test", 
-                            "Descriptive column Name"	= "test", 
-                            "Units"	= "test", 
-                            "Oracle data type" = "test", 
-                            "Column description" = "test")
-  }
+  # } else {
+  #   b_columns <- data.frame("TABLE_NAME" = b$TABLE_NAME, 
+  #                           "Column name from data"	= "test", 
+  #                           "Descriptive column Name"	= "test", 
+  #                           "Units"	= "test", 
+  #                           "Oracle data type" = "test", 
+  #                           "Column description" = "test")
+  # }
+  
   # Collect all column metadata for all table locations
   str00 <- paste0("## Data tables", "\n\n")
   

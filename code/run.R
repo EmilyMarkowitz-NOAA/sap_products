@@ -93,45 +93,54 @@ output_r_session(path = "temp/")
 file.edit("code/Scripts/lookup_tables.R")
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##   Create lookup tables ----
+##   Process RACEBASE.HAUL to create Haul Table (Tech Memo)
+# - need to initially connect to Oracle and download updated table each year (set ORACLE --> TRUE)
+# - need to add in current year's CRUISE and VESSEL IDs and HAUL_TYPE (3, and 17 if retow year)
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-file.edit("code/Scripts/lookup_tables.R")
+ORACLE = FALSE
+file.edit("code/Scripts/haul_table.R")
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##   Create lookup tables ----
+##   ## NEW PROPOSED TABLEs
+# Process EBSCRAB specimen info from Oracle to create Specimen Table for stock assessment authors
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-file.edit("code/Scripts/lookup_tables.R")
+ORACLE = FALSE 
+file.edit("code/Scripts/raw_process.R")
 
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##   Pull Existing GAP_PRODUCTS Tables and Views ----
-##   Import current versions of the data tables in GAP_PRODUCTS locally within 
-##   the gap_products repository in temp/ folder. These local versions of the 
-##   tables are used to compare against the updated production tables that we 
-##   create in a later step to what is currently in the GAP_PRODUCTS schema.
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-file.edit("code/pull_existing_tables.R")
 
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##   Create Production Tables and Compare Data Table----
-##   Calculate the four major standard data products: CPUE, BIOMASS, SIZECOMP, 
-##   AGECOMP for all taxa, survey years, survey regions and compare to what
-##   is on GAP_PRODUCTS currently 
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-file.edit("code/production.R")
+# Load biomass-abundance-cpue function
+source("./Scripts/bio_abund_cpue.R")
 
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##   Update Production Tables and Update AKFIN and FOSS Tables----
-##   Removed, new, and modified records are updated in GAP_PRODUCTS.
-##   Once GAP_PRODUCTS tables are updated, run queries for the materialized 
-##   views created for AKFIN and FOSS.
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-file.edit("code/update_production_tables.R")
-
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##   Archive GAP_PRODUCTS  ----
-##   Archive the bits that would allow one to reproduce the standard data 
-##   tables. The session info and package versions are also .csv files in the 
-##   temp/folder.
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-source("functions/archive_gap_products.R") 
-archive_gap_products(path = "temp/", archive_path = "G:/GAP_PRODUCTS_Archives/")
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ##   Pull Existing GAP_PRODUCTS Tables and Views ----
+# ##   Import current versions of the data tables in GAP_PRODUCTS locally within 
+# ##   the gap_products repository in temp/ folder. These local versions of the 
+# ##   tables are used to compare against the updated production tables that we 
+# ##   create in a later step to what is currently in the GAP_PRODUCTS schema.
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# file.edit("code/pull_existing_tables.R")
+# 
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ##   Create Production Tables and Compare Data Table----
+# ##   Calculate the four major standard data products: CPUE, BIOMASS, SIZECOMP, 
+# ##   AGECOMP for all taxa, survey years, survey regions and compare to what
+# ##   is on GAP_PRODUCTS currently 
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# file.edit("code/production.R")
+# 
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ##   Update Production Tables and Update AKFIN and FOSS Tables----
+# ##   Removed, new, and modified records are updated in GAP_PRODUCTS.
+# ##   Once GAP_PRODUCTS tables are updated, run queries for the materialized 
+# ##   views created for AKFIN and FOSS.
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# file.edit("code/update_production_tables.R")
+# 
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ##   Archive GAP_PRODUCTS  ----
+# ##   Archive the bits that would allow one to reproduce the standard data 
+# ##   tables. The session info and package versions are also .csv files in the 
+# ##   temp/folder.
+# ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# source("functions/archive_gap_products.R") 
+# archive_gap_products(path = "temp/", archive_path = "G:/GAP_PRODUCTS_Archives/")

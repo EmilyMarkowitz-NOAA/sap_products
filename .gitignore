@@ -49,3 +49,6 @@ po/*~
 rsconnect/
 
 /.quarto/
+
+temp/
+temp/Tables/
