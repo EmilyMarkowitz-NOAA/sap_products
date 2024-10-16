@@ -283,7 +283,7 @@ AKFIN_AREA <- dplyr::bind_rows(
 # }
 
 gapindex::upload_oracle(x = AKFIN_AREA, 
-                        table_name = "AKFIN_AREA", 
+                        table_name = "AREA", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
                         metadata_column = metadata_column %>% 
@@ -295,7 +295,7 @@ gapindex::upload_oracle(x = AKFIN_AREA,
                         share_with_all_users = TRUE)  
 
 temp_oracle_push(x = AKFIN_AREA, 
-                 table_name = "AKFIN_AREA", 
+                 table_name = "AREA", 
                  channel = channel_ehm, 
                  schema = "markowitze", 
                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_AREA)), 
@@ -310,7 +310,7 @@ AKFIN_STRATUM_GROUP <- dist_stock_lookup %>%
   dplyr::distinct()
 
 gapindex::upload_oracle(x = AKFIN_STRATUM_GROUP, 
-                        table_name = "AKFIN_STRATUM_GROUP", 
+                        table_name = "STRATUM_GROUP", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_STRATUM_GROUP)), 
@@ -328,7 +328,7 @@ AKFIN_SURVEY_YEAR <- AKFIN_AREA %>%
   dplyr::mutate(YEAR = DESIGN_YEAR) # could be important later in the survey dev and is important for processing through gapindex
 
 gapindex::upload_oracle(x = AKFIN_SURVEY_YEAR, 
-                        table_name = "AKFIN_SURVEY_YEAR", 
+                        table_name = "SURVEY_YEAR", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(AKFIN_SURVEY_YEAR)), 
@@ -555,7 +555,7 @@ metadata_column <- metadata_column %>%
                             colname_desc = "Type of station."))
 
 gapindex::upload_oracle(x = stock_stations_lookup, 
-                        table_name = "AKFIN_STATION", 
+                        table_name = "STATION", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stock_stations_lookup)), 
@@ -563,7 +563,7 @@ gapindex::upload_oracle(x = stock_stations_lookup,
                         share_with_all_users = TRUE)
 
 temp_oracle_push(x = stock_stations_lookup, 
-                 table_name = "AKFIN_STATION", 
+                 table_name = "STATION", 
                  channel = channel_ehm, 
                  schema = "markowitze", 
                  metadata_column = metadata_column %>% dplyr::filter(colname %in% names(stock_stations_lookup)), 

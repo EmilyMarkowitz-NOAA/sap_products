@@ -703,7 +703,7 @@ print("updated haul table written to Data_Processing and Tech Memo folders")
 # Simply, we should just add these observations to GAP_PRODUCTS.AKFIN_HAUL
 
 gapindex::upload_oracle(x = haul_table, 
-                        table_name = "AKFIN_HAUL", 
+                        table_name = "HAUL", 
                         channel = channel_ehm, 
                         schema = "markowitze", 
                         metadata_column = metadata_column %>% dplyr::filter(colname %in% names(haul_table)), 

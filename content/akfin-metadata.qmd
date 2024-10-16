@@ -10,8 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 [AKFIN Answers](https://akfin.psmfc.org/akfin-answers/) is an Oracle BI tool used for distributing data to stock assessors and other users. Usernames and passwords are distinct from direct AKFIN database credentials. 
 
-# NEW TABLES 
-
 ```{r table-locations, eval = TRUE, echo = FALSE}
  # You can download all of the tables and saving them locally. These are all of the new tables for you to look through:
 akfin_views <- RODBC::sqlQuery(

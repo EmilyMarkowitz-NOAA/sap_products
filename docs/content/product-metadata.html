@@ -237,7 +237,12 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#data-tables" id="toc-data-tables" class="nav-link active" data-scroll-target="#data-tables">Data tables</a>
   <ul class="collapse">
+  <li><a href="#area" id="toc-area" class="nav-link" data-scroll-target="#area">AREA</a></li>
+  <li><a href="#haul" id="toc-haul" class="nav-link" data-scroll-target="#haul">HAUL</a></li>
+  <li><a href="#station" id="toc-station" class="nav-link" data-scroll-target="#station">STATION</a></li>
   <li><a href="#stock_maturity_cutoff" id="toc-stock_maturity_cutoff" class="nav-link" data-scroll-target="#stock_maturity_cutoff">STOCK_MATURITY_CUTOFF</a></li>
+  <li><a href="#stratum_group" id="toc-stratum_group" class="nav-link" data-scroll-target="#stratum_group">STRATUM_GROUP</a></li>
+  <li><a href="#survey_year" id="toc-survey_year" class="nav-link" data-scroll-target="#survey_year">SURVEY_YEAR</a></li>
   <li><a href="#test" id="toc-test" class="nav-link" data-scroll-target="#test">TEST</a></li>
   <li><a href="#xcrab_species" id="toc-xcrab_species" class="nav-link" data-scroll-target="#xcrab_species">XCRAB_SPECIES</a></li>
   <li><a href="#xstock" id="toc-xstock" class="nav-link" data-scroll-target="#xstock">XSTOCK</a></li>
@@ -276,10 +281,321 @@ function googleTranslateElementInit() {
 
 <section id="data-tables" class="level2">
 <h2 class="anchored" data-anchor-id="data-tables">Data tables</h2>
+<section id="area" class="level3">
+<h3 class="anchored" data-anchor-id="area">AREA</h3>
+<p>Lookup table for which area are contained within a given AREA_ID for each DESIGN_YEAR. This table can be used in tandom with the GAP_PRODCUTS.STARTUM_GROUPS or AKFIN_STARTUM_GROUPS tables. Tables are provided by the Resource Assessment and Conservation Engineering Division (RACE) Shellfish Assessment Program (SAP) of the Alaska Fisheries Science Center (AFSC).There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).The GitHub repository for the scripts that created this code can be found at (https://github.com/EmilyMarkowitz-NOAA/sap_products).</p>
+<p>Number of columns: 12</p>
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Column name from data
+</th>
+<th style="text-align:left;">
+Descriptive column Name
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Oracle data type
+</th>
+<th style="text-align:left;">
+Column description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+DESIGN_YEAR
+</td>
+<td style="text-align:left;">
+Design year
+</td>
+<td style="text-align:left;">
+year
+</td>
+<td style="text-align:left;">
+NUMBER(10,0)
+</td>
+<td style="text-align:left;">
+Year ID associated with a given value AREA_ID. This field describes the changes in the survey design over time.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SURVEY_DEFINITION_ID
+</td>
+<td style="text-align:left;">
+Survey ID
+</td>
+<td style="text-align:left;">
+ID key code
+</td>
+<td style="text-align:left;">
+NUMBER(38,0)
+</td>
+<td style="text-align:left;">
+The survey definition ID key code is an integer that uniquely identifies a survey region/survey design. The column survey_definition_id is associated with the srvy and survey columns. Full list of survey definition IDs are in RACE_DATA.SURVEY_DEFINITIONS and in the <a href="https://www.fisheries.noaa.gov/resource/document/groundfish-survey-species-code-manual-and-data-codes-manual">code books</a>.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AREA_ID
+</td>
+<td style="text-align:left;">
+Area ID
+</td>
+<td style="text-align:left;">
+ID key code
+</td>
+<td style="text-align:left;">
+NUMBER(38,0)
+</td>
+<td style="text-align:left;">
+Area ID key code for each statistical area used to produce production estimates (e.g., biomass, population, age comps, length comps). Each area ID is unique within each survey.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AREA_TYPE
+</td>
+<td style="text-align:left;">
+Area ID type description
+</td>
+<td style="text-align:left;">
+category
+</td>
+<td style="text-align:left;">
+VARCHAR2(255 BYTE)
+</td>
+<td style="text-align:left;">
+The type of stratum that AREA_ID represents. Types include: STRATUM (the smallest building-block unit of area in these surveys), REGION, DEPTH, SUBAREA, INPFC BY DEPTH, INPFC, SUBAREA BY DEPTH, REGULATORY AREA, NMFS STATISTICAL AREA.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AREA_NAME
+</td>
+<td style="text-align:left;">
+Area ID name
+</td>
+<td style="text-align:left;">
+text
+</td>
+<td style="text-align:left;">
+VARCHAR2(4000 BYTE)
+</td>
+<td style="text-align:left;">
+Descriptive name of each AREA_ID. These names often identify the region, depth ranges, or other regional information for the area ID.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DESCRIPTION
+</td>
+<td style="text-align:left;">
+Description
+</td>
+<td style="text-align:left;">
+text
+</td>
+<td style="text-align:left;">
+VARCHAR2(4000 BYTE)
+</td>
+<td style="text-align:left;">
+Description of row observation.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AREA_KM2
+</td>
+<td style="text-align:left;">
+Area (km2)
+</td>
+<td style="text-align:left;">
+kilometers squared
+</td>
+<td style="text-align:left;">
+NUMBER(38,3)
+</td>
+<td style="text-align:left;">
+Area in square kilometers.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DEPTH_MIN_M
+</td>
+<td style="text-align:left;">
+Area ID minimum depth (m)
+</td>
+<td style="text-align:left;">
+meters
+</td>
+<td style="text-align:left;">
+NUMBER(38,3)
+</td>
+<td style="text-align:left;">
+Minimum depth (meters).
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DEPTH_MAX_M
+</td>
+<td style="text-align:left;">
+Area ID maximum depth (m)
+</td>
+<td style="text-align:left;">
+meters
+</td>
+<td style="text-align:left;">
+NUMBER(38,3)
+</td>
+<td style="text-align:left;">
+Maximum depth (meters).
+</td>
+</tr>
+</tbody>
+
+</table>
+</section>
+<section id="haul" class="level3">
+<h3 class="anchored" data-anchor-id="haul">HAUL</h3>
+<p>Modifed of GAP_PRODUCTS.HAUL OR AKFIN_HAUL. Tables are provided by the Resource Assessment and Conservation Engineering Division (RACE) Shellfish Assessment Program (SAP) of the Alaska Fisheries Science Center (AFSC).There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).The GitHub repository for the scripts that created this code can be found at (https://github.com/EmilyMarkowitz-NOAA/sap_products).</p>
+<p>Number of columns: 26</p>
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Column name from data
+</th>
+<th style="text-align:left;">
+Descriptive column Name
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Oracle data type
+</th>
+<th style="text-align:left;">
+Column description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+</tr>
+</tbody>
+
+</table>
+</section>
+<section id="station" class="level3">
+<h3 class="anchored" data-anchor-id="station">STATION</h3>
+<p>Lookup table of stations. Tables are provided by the Resource Assessment and Conservation Engineering Division (RACE) Shellfish Assessment Program (SAP) of the Alaska Fisheries Science Center (AFSC).There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).The GitHub repository for the scripts that created this code can be found at (https://github.com/EmilyMarkowitz-NOAA/sap_products).</p>
+<p>Number of columns: 8</p>
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Column name from data
+</th>
+<th style="text-align:left;">
+Descriptive column Name
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Oracle data type
+</th>
+<th style="text-align:left;">
+Column description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+</tr>
+</tbody>
+
+</table>
+</section>
 <section id="stock_maturity_cutoff" class="level3">
 <h3 class="anchored" data-anchor-id="stock_maturity_cutoff">STOCK_MATURITY_CUTOFF</h3>
 <p>MALE cutlines lookup tableTables are provided by the Resource Assessment and Conservation Engineering Division (RACE) Shellfish Assessment Program (SAP) of the Alaska Fisheries Science Center (AFSC).There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).The GitHub repository for the scripts that created this code can be found at (https://github.com/EmilyMarkowitz-NOAA/sap_products).</p>
 <p>Number of columns: 10</p>
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Column name from data
+</th>
+<th style="text-align:left;">
+Descriptive column Name
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Oracle data type
+</th>
+<th style="text-align:left;">
+Column description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+</tr>
+</tbody>
+
+</table>
+</section>
+<section id="stratum_group" class="level3">
+<h3 class="anchored" data-anchor-id="stratum_group">STRATUM_GROUP</h3>
+<p>Lookup table for which strata are contained within a given AREA_ID. This table can be used in tandom with the GAP_PRODCUTS.AREA or AKFIN_AREA tables. Tables are provided by the Resource Assessment and Conservation Engineering Division (RACE) Shellfish Assessment Program (SAP) of the Alaska Fisheries Science Center (AFSC).There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).The GitHub repository for the scripts that created this code can be found at (https://github.com/EmilyMarkowitz-NOAA/sap_products).</p>
+<p>Number of columns: 4</p>
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Column name from data
+</th>
+<th style="text-align:left;">
+Descriptive column Name
+</th>
+<th style="text-align:left;">
+Units
+</th>
+<th style="text-align:left;">
+Oracle data type
+</th>
+<th style="text-align:left;">
+Column description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+</tr>
+</tbody>
+
+</table>
+</section>
+<section id="survey_year" class="level3">
+<h3 class="anchored" data-anchor-id="survey_year">SURVEY_YEAR</h3>
+<p>Lookup table for DESIGN_YEAR should be used for which survey YEAR. This table can be used in tandom with the GAP_PRODCUTS.SURVEY_YEAR or AKFIN_SURVEY_YEAR tables. Tables are provided by the Resource Assessment and Conservation Engineering Division (RACE) Shellfish Assessment Program (SAP) of the Alaska Fisheries Science Center (AFSC).There are legal restrictions on access to the data. These data are not intended for public dissemination and should not be shared without the explicit written consent of the data managers and owners (NOAA Fisheries).The GitHub repository for the scripts that created this code can be found at (https://github.com/EmilyMarkowitz-NOAA/sap_products).</p>
+<p>Number of columns: 3</p>
 
 <table class="table table-striped" style="margin-left: auto; margin-right: auto;">
 <thead>

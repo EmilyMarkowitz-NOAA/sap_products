@@ -125,10 +125,41 @@ srvy_cite <- srvy_cite %>%
   dplyr::filter(SRVY %in% c("EBS", "NBS", "BSS", "CRAB") )
 ```
 
-**Learn more about these surveys** (**2023NEBS?**; **2023NEBS?**;
-**RN979?**; **SAPcrab2024?**).
+**Learn more about these surveys** ([Hoff, 2016](#ref-RN979); [Markowitz
+et al., 2024](#ref-2023NEBS), [2024](#ref-2023NEBS); [Zacher et al.,
+2024](#ref-SAPcrab2024)).
 
-<div id="refs">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0" line-spacing="2">
+
+<div id="ref-RN979" class="csl-entry">
+
+Hoff, G. R. (2016). *Results of the 2016 eastern Bering Sea upper
+continental slope survey of groundfishes and invertebrate resources*
+(NOAA Tech. Memo. NOAA-AFSC-339). U.S. Dep. Commer.
+<https://doi.org/10.7289/V5/TM-AFSC-339>
+
+</div>
+
+<div id="ref-2023NEBS" class="csl-entry">
+
+Markowitz, E. H., Dawson, E. J., Wassermann, S., Anderson, A. B., Rohan,
+S. K., Charriere, B. K., and Stevenson, D. E. (2024). *Results of the
+2023 eastern and northern Bering Sea continental shelf bottom trawl
+survey of groundfish and invertebrate fauna* (NOAA Tech. Memo.
+NMFS-AFSC-487; p. 242). U.S. Dep. Commer.
+<https://doi.org/10.25923/2mry-yx09>
+
+</div>
+
+<div id="ref-SAPcrab2024" class="csl-entry">
+
+Zacher, L. S., Richar, J. I., Fedewa, E. J., Ryznar, E. R., and Litzow,
+M. A. (2024). *The 2024 eastern Bering Sea continental shelf trawl
+survey: Results for commercial crab species DRAFT* \[NOAA Tech. Memo.\].
+<https://www.fisheries.noaa.gov/resource/document/draft-2024-eastern-bering-sea-crab-technical-memorandum>
+
+</div>
 
 </div>
 
@@ -156,11 +187,8 @@ sessionInfo()
     ## 
     ## 
     ## locale:
-    ## [1] LC_COLLATE=English_United States.utf8 
-    ## [2] LC_CTYPE=English_United States.utf8   
-    ## [3] LC_MONETARY=English_United States.utf8
-    ## [4] LC_NUMERIC=C                          
-    ## [5] LC_TIME=English_United States.utf8    
+    ## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+    ## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
     ## 
     ## time zone: America/Los_Angeles
     ## tzcode source: internal
@@ -169,49 +197,33 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ##  [1] akfingapdata_0.1.0 DBI_1.2.3          RODBC_1.3-23       ftExtra_0.6.4     
-    ##  [5] badger_0.2.4       scales_1.3.0       stringr_1.5.1      here_1.0.1        
-    ##  [9] flextable_0.9.6    kableExtra_1.4.0   janitor_2.2.0      readxl_1.4.3      
-    ## [13] tidyr_1.3.1        readr_2.1.5        magrittr_2.0.3     googledrive_2.1.1 
-    ## [17] akgfmaps_3.5.3     terra_1.7-78       stars_0.6-6        abind_1.4-8       
-    ## [21] sf_1.0-17          gstat_2.1-2        ggplot2_3.5.1      dplyr_1.1.4       
-    ## [25] classInt_0.4-10    gapindex_2.2.0     distill_1.6        devtools_2.4.5    
-    ## [29] usethis_3.0.0     
+    ##  [1] XML_3.99-0.17      RCurl_1.98-1.16    data.table_1.16.0  akfingapdata_0.1.0 DBI_1.2.3          RODBC_1.3-23       ftExtra_0.6.4     
+    ##  [8] badger_0.2.4       scales_1.3.0       stringr_1.5.1      here_1.0.1         flextable_0.9.6    kableExtra_1.4.0   janitor_2.2.0     
+    ## [15] readxl_1.4.3       tidyr_1.3.1        readr_2.1.5        magrittr_2.0.3     googledrive_2.1.1  akgfmaps_3.5.3     terra_1.7-78      
+    ## [22] stars_0.6-6        abind_1.4-8        sf_1.0-17          gstat_2.1-2        ggplot2_3.5.1      dplyr_1.1.4        classInt_0.4-10   
+    ## [29] gapindex_2.2.0     distill_1.6        devtools_2.4.5     usethis_3.0.0     
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] remotes_2.5.0           rlang_1.1.4             snakecase_0.11.1       
-    ##  [4] e1071_1.7-14            compiler_4.4.1          systemfonts_1.1.0      
-    ##  [7] vctrs_0.6.5             profvis_0.4.0           pkgconfig_2.0.3        
-    ## [10] fastmap_1.2.0           ellipsis_0.3.2          utf8_1.2.4             
-    ## [13] promises_1.3.0          rmarkdown_2.28          sessioninfo_1.2.2      
-    ## [16] tzdb_0.4.0              ragg_1.3.3              purrr_1.0.2            
-    ## [19] rvcheck_0.2.1           xfun_0.47               cachem_1.1.0           
-    ## [22] jsonlite_1.8.9          later_1.3.2             uuid_1.2-1             
-    ## [25] parallel_4.4.1          R6_2.5.1                RColorBrewer_1.1-3     
-    ## [28] stringi_1.8.4           pkgload_1.4.0           lubridate_1.9.3        
-    ## [31] cellranger_1.1.0        Rcpp_1.0.13             knitr_1.48             
-    ## [34] zoo_1.8-12              readtext_0.91           dlstats_0.1.7          
-    ## [37] FNN_1.1.4.1             httpuv_1.6.15           timechange_0.3.0       
-    ## [40] tidyselect_1.2.1        yaml_2.3.10             rstudioapi_0.16.0      
-    ## [43] codetools_0.2-20        miniUI_0.1.1.1          pkgbuild_1.4.4         
-    ## [46] lattice_0.22-6          tibble_3.2.1            intervals_0.15.5       
-    ## [49] shiny_1.9.1             withr_3.0.1             askpass_1.2.1          
-    ## [52] evaluate_1.0.1          units_0.8-5             proxy_0.4-27           
-    ## [55] urlchecker_1.0.1        zip_2.3.1               xts_0.14.0             
-    ## [58] xml2_1.3.6              BiocManager_1.30.25     pillar_1.9.0           
-    ## [61] KernSmooth_2.23-24      generics_0.1.3          rprojroot_2.0.4        
-    ## [64] sp_2.1-4                spacetime_1.3-2         hms_1.1.3              
-    ## [67] munsell_0.5.1           xtable_1.8-4            class_7.3-22           
-    ## [70] glue_1.7.0              gdtools_0.4.0           tools_4.4.1            
-    ## [73] data.table_1.16.0       fs_1.6.4                grid_4.4.1             
-    ## [76] colorspace_2.1-1        cli_3.6.3               textshaping_0.4.0      
-    ## [79] officer_0.6.7           fontBitstreamVera_0.1.1 fansi_1.0.6            
-    ## [82] gargle_1.5.2            viridisLite_0.4.2       svglite_2.1.3          
-    ## [85] downlit_0.4.4           gtable_0.3.5            yulab.utils_0.1.7      
-    ## [88] digest_0.6.37           fontquiver_0.2.1        htmlwidgets_1.6.4      
-    ## [91] memoise_2.0.1           htmltools_0.5.8.1       lifecycle_1.0.4        
-    ## [94] httr_1.4.7              mime_0.12               fontLiberation_0.1.0   
-    ## [97] openssl_2.2.1
+    ##  [1] RColorBrewer_1.1-3      wk_0.9.3                rstudioapi_0.16.0       dlstats_0.1.7           jsonlite_1.8.9         
+    ##  [6] rmarkdown_2.28          fs_1.6.4                ragg_1.3.3              vctrs_0.6.5             memoise_2.0.1          
+    ## [11] askpass_1.2.1           htmltools_0.5.8.1       cellranger_1.1.0        s2_1.1.7                KernSmooth_2.23-24     
+    ## [16] htmlwidgets_1.6.4       zoo_1.8-12              lubridate_1.9.3         cachem_1.1.0            uuid_1.2-1             
+    ## [21] mime_0.12               lifecycle_1.0.4         pkgconfig_2.0.3         R6_2.5.1                fastmap_1.2.0          
+    ## [26] shiny_1.9.1             snakecase_0.11.1        digest_0.6.37           colorspace_2.1-1        rprojroot_2.0.4        
+    ## [31] pkgload_1.4.0           textshaping_0.4.0       fansi_1.0.6             timechange_0.3.0        httr_1.4.7             
+    ## [36] compiler_4.4.1          gargle_1.5.2            proxy_0.4-27            intervals_0.15.5        remotes_2.5.0          
+    ## [41] fontquiver_0.2.1        withr_3.0.1             pkgbuild_1.4.4          openssl_2.2.1           sessioninfo_1.2.2      
+    ## [46] tools_4.4.1             units_0.8-5             zip_2.3.1               httpuv_1.6.15           glue_1.7.0             
+    ## [51] promises_1.3.0          grid_4.4.1              generics_0.1.3          gtable_0.3.5            tzdb_0.4.0             
+    ## [56] class_7.3-22            hms_1.1.3               sp_2.1-4                xml2_1.3.6              utf8_1.2.4             
+    ## [61] pillar_1.9.0            yulab.utils_0.1.7       later_1.3.2             lattice_0.22-6          FNN_1.1.4.1            
+    ## [66] tidyselect_1.2.1        rvcheck_0.2.1           fontLiberation_0.1.0    miniUI_0.1.1.1          downlit_0.4.4          
+    ## [71] knitr_1.48              fontBitstreamVera_0.1.1 svglite_2.1.3           xfun_0.47               stringi_1.8.4          
+    ## [76] yaml_2.3.10             evaluate_1.0.1          codetools_0.2-20        officer_0.6.7           gdtools_0.4.0          
+    ## [81] tibble_3.2.1            BiocManager_1.30.25     cli_3.6.3               xtable_1.8-4            systemfonts_1.1.0      
+    ## [86] munsell_0.5.1           spacetime_1.3-2         Rcpp_1.0.13             readtext_0.91           parallel_4.4.1         
+    ## [91] ellipsis_0.3.2          profvis_0.4.0           urlchecker_1.0.1        bitops_1.0-9            viridisLite_0.4.2      
+    ## [96] xts_0.14.0              e1071_1.7-14            purrr_1.0.2             rlang_1.1.4
 
 ## NOAA README
 
