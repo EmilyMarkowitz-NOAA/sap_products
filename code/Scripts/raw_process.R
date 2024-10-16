@@ -173,22 +173,127 @@ specimen_table <- ebscrab %>%
     START_DATE = as.Date(START_DATE, "%d-%b-%y"),
     START_HOUR = NA) %>% #to_char(start_time,'HH24MI')start_hour -- format(as.POSIXct(as.Date(specimen$START_TIME[6], "%d-%b-%y")), format = "%H%M")
   dplyr::select(!HAULJOIN) %>%
-  filter(!(HAUL_TYPE == 17 & SPECIES_CODE != 69322)) %>%
-  right_join(., haul_table) %>%
-  dplyr::select(HAULJOIN, VESSEL, CRUISE, HAUL, HAUL_TYPE, PERFORMANCE, START_DATE, START_HOUR, DURATION,
-                DISTANCE_FISHED, NET_WIDTH, NET_MEASURED, NET_HEIGHT, MID_LATITUDE, MID_LONGITUDE, GIS_STATION,
-                GEAR_DEPTH, BOTTOM_DEPTH, SURFACE_TEMPERATURE, GEAR_TEMPERATURE, WIRE_LENGTH, GEAR, ACCESSORIES,
-                SUBSAMPLE, AREA_SWEPT, SPECIES_CODE, SEX, LENGTH, LENGTH_1MM, WIDTH, WIDTH_1MM, SHELL_CONDITION,
-                EGG_COLOR, EGG_CONDITION, CLUTCH_SIZE, MERUS_LENGTH, CHELA_HEIGHT, DISEASE_CODE, DISEASE_DORSAL,
-                DISEASE_VENTRAL, DISEASE_LEGS, CALCULATED_WEIGHT, CALCULATED_WEIGHT_1MM, WEIGHT, SAMPLING_FACTOR)
+  dplyr::filter(!(HAUL_TYPE == 17 & SPECIES_CODE != 69322)) %>%
+  dplyr::right_join(haul_table %>% 
+                      dplyr::select(-START_DATE)) %>%
+  dplyr::select(HAULJOIN, #VESSEL, CRUISE, HAUL, HAUL_TYPE, PERFORMANCE, START_DATE, START_HOUR, DURATION,
+                # DISTANCE_FISHED, NET_WIDTH, NET_MEASURED, NET_HEIGHT, MID_LATITUDE, MID_LONGITUDE, GIS_STATION,
+                # GEAR_DEPTH, BOTTOM_DEPTH, SURFACE_TEMPERATURE, GEAR_TEMPERATURE, WIRE_LENGTH, GEAR, ACCESSORIES,
+                # SUBSAMPLE, AREA_SWEPT, 
+                # SPECIMEN_ID = SPECIMENID, # should exist
+                SPECIES_CODE, 
+                SEX, 
+                LENGTH, #LENGTH_1MM, 
+                WIDTH, WIDTH_1MM, 
+                SHELL_CONDITION,
+                EGG_COLOR, 
+                EGG_CONDITION, 
+                LENGTH_MM_MERUS = MERUS_LENGTH, 
+                HEIGHT_CHELA_MM = CHELA_HEIGHT, 
+                CHELA_HEIGHT, 
+                DISEASE_CODE, 
+                DISEASE_DORSAL,
+                DISEASE_VENTRAL, 
+                DISEASE_LEGS, 
+                WEIGHT_G_CALCULATED = CALCULATED_WEIGHT, #CALCULATED_WEIGHT_1MM, 
+                WEIGHT_G = WEIGHT, 
+                # GONAD_G = GONAD_WT, 
+                # SPECIMEN_SUBSAMPLE_METHOD,
+                SAMPLING_FACTOR) # does this actually get used for anything?
 
-# NEW FORMAT: reworking from above -- don't include 0-catch stations....don't include haul info except for HAULJOIN
-specimen_table <- specimen_table %>% 
-  # mutate(SURVEY_YEAR = as.numeric(substr(CRUISE, 1, 4))) %>%
-  dplyr::select(HAULJOIN, SPECIES_CODE, SEX, LENGTH, LENGTH_1MM, WIDTH, WIDTH_1MM, SHELL_CONDITION,
-                EGG_COLOR, EGG_CONDITION, CLUTCH_SIZE, MERUS_LENGTH, CHELA_HEIGHT, DISEASE_CODE, DISEASE_DORSAL,
-                DISEASE_VENTRAL, DISEASE_LEGS, CALCULATED_WEIGHT, CALCULATED_WEIGHT_1MM, WEIGHT, SAMPLING_FACTOR)
+specimen_table <- specimen_table %>%
+  dplyr::mutate(SPECIMEN_ID = NA, 
+                # AGE = NA, 
+                # MATURITY = NA, 
+                # GONAD_G = NA, 
+                # SPECIMEN_SUBSAMPLE_METHOD = NA, 
+                # AGE_DETERMINATION_METHOD = NA, 
+                LENGTH_MM = ifelse(is.na(LENGTH), LENGTH, WIDTH), 
+                LENGTH_TYPE = ifelse(is.na(LENGTH), 7, 8)) %>% 
+  dplyr::select(-LENGTH, -WIDTH) # -LENGTH_1MM, -WIDTH_1MM, -CALCULATED_WEIGHT_1MM, 
+  # dplyr::rename(HAULJOIN, 
+  #               SPECIMENID AS SPECIMEN_ID, 
+  #               SPECIES_CODE, 
+  #               LENGTH AS LENGTH_MM, 
+  #               SEX, 
+  #               WEIGHT AS WEIGHT_G, 
+  #               AGE, 
+  #               MATURITY, 
+  #               GONAD_WT AS GONAD_G, 
+  #               SPECIMEN_SUBSAMPLE_METHOD, 
+  #               SPECIMEN_SAMPLE_TYPE, 
+  #               AGE_DETERMINATION_METHOD ) # likely just null here, right?
+  
+  metadata_column <- metadata_column %>% 
+    dplyr::add_row(data.frame(colname = "SHELL_CONDITION", 
+                              colname_long = "Condition of carapace shell", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Condition of carapace shell")) %>% 
+    dplyr::add_row(data.frame(colname = "EGG_COLOR", 
+                              colname_long = "Color of eggs on gravid females", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Color of eggs on gravid females")) %>% 
+    dplyr::add_row(data.frame(colname = "EGG_CONDITION", 
+                              colname_long = "Condition of eggs on gravid females", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Condition of eggs on gravid females")) %>% 
+    dplyr::add_row(data.frame(colname = "CLUTCH_SIZE", 
+                              colname_long = "Eggs clutch size on gravid females", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Eggs clutch size on gravid females")) %>% 
+    dplyr::add_row(data.frame(colname = "SAMPLING FACTOR", 
+                              colname_long = "Sampling factor", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Sampling factor")) %>% 
+    dplyr::add_row(data.frame(colname = "LENGTH_MM_MERUS", 
+                              colname_long = "Length of merus in milimeters", 
+                              units = "millimeters", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Length in millimeters of merus.")) %>% 
+    dplyr::add_row(data.frame(colname = "HEIGHT_CHELA_MM", 
+                              colname_long = "Length of chela in milimeters", 
+                              units = "millimeters", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Length in millimeters of chela.")) %>% 
+    dplyr::add_row(data.frame(colname = "DISEASE_CODE", 
+                              colname_long = "Overall disease code", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "....")) %>% 
+    dplyr::add_row(data.frame(colname = "DISEASE_DORSAL", 
+                              colname_long = "Disease on dorsal code", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "....")) %>% 
+    dplyr::add_row(data.frame(colname = "DISEASE_VENTRAL", 
+                              colname_long = "Disease on ventral code", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)",  
+                              colname_desc = "....")) %>% 
+    dplyr::add_row(data.frame(colname = "DISEASE_LEGS", 
+                              colname_long = "Desease in legs code", 
+                              units = "Catagory", 
+                              datatype = "NUMBER(10,0)",  
+                              colname_desc = "....")) %>% 
+    dplyr::add_row(data.frame(colname = "WEIGHT_G_CALCULATED", 
+                              colname_long = "Weight in grams", 
+                              units = "Weight", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Weight in grams"))  
+  
+write.csv(x = specimen_table, file = here::here("temp", "specimen_table.csv"), row.names = FALSE)
 
+gapindex::upload_oracle(x = specimen_table, 
+                        table_name = "SPECIMEN", 
+                        channel = channel_ehm, 
+                        schema = "markowitze", 
+                        metadata_column = metadata_column %>% dplyr::filter(colname %in% names(specimen_table)), 
+                        table_metadata = paste0("Modifed of GAP_PRODUCTS.SPECIMEN OR AKFIN_SPECIMEN. ", legal_disclaimer),
+                        share_with_all_users = TRUE)
 
 
 # ## OLD WORKFLOW: parse specimen table by species and save for Tech Memo and Oracle
