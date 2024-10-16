@@ -139,7 +139,7 @@ print_table_metadata <- function(channel, locations, owner = "GAP_PRODUCTS") {
       FROM ALL_TAB_COLS
       JOIN (GAP_PRODUCTS.METADATA_COLUMN) GP_META
           ON GP_META.METADATA_COLNAME = ALL_TAB_COLS.COLUMN_NAME
-      WHERE OWNER = 'GAP_PRODUCTS' AND TABLE_NAME IN ",
+      WHERE OWNER = '",owner,"' AND TABLE_NAME IN ",
           gapindex::stitch_entries(b$TABLE_NAME)
         )
     )

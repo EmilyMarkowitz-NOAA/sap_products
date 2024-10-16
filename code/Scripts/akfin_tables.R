@@ -57,7 +57,6 @@ stratum_lookup <- tibble(STRATUM_ID = c(1:3, 5, 7:14, 17),
 # add lines to add LOAD_DATE column (in DD-Mon-YY; does this get updated??), write to .csv, and bundle with AKFIN products?
 # 'ebscrab_stratum.csv'
 
-
 ## STRATUM DISTRICT lookup table ------------------------------------------------------------ 
 ## NOTE: We don't really use the numieric ID columns for anything....
 stratum_dist_lookup <- tibble(STRATUM_DISTRICT_ID = c(1:2, 6:24, 27:32),

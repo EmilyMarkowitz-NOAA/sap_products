@@ -18,7 +18,7 @@ WHERE owner = 'MARKOWITZE';") %>%
 
 locations <- product_views$TABLE_NAME
 
-str00 <- print_table_metadata(channel_ehm, locations, owner = 'MARKOWITZE')
+str00 <- print_table_metadata(channel = channel_ehm, locations, owner = 'MARKOWITZE')
 
 # locations <- c("TEST")
 # # "AGECOMP", "AREA",
