@@ -62,7 +62,7 @@ if(ORACLE == TRUE){
 }
 
 # Load EBSCRAB.EBSCRAB 
-ebscrab <- read.csv(paste0(data_dir, "/EBSCRAB_EBSCRAB.csv")) #%>% filter(CRUISE == 202401)
+ebscrab <- read.csv(here::here("temp/EBSCRAB_EBSCRAB.csv")) #%>% filter(CRUISE == 202401)
 
 print("loaded EBSCRAB.EBSCRAB")
 
@@ -172,19 +172,22 @@ specimen_table <- ebscrab %>%
     #!! calculate start date and start hour
     START_DATE = as.Date(START_DATE, "%d-%b-%y"),
     START_HOUR = NA) %>% #to_char(start_time,'HH24MI')start_hour -- format(as.POSIXct(as.Date(specimen$START_TIME[6], "%d-%b-%y")), format = "%H%M")
-  dplyr::select(!HAULJOIN) %>%
+  # dplyr::select(!HAULJOIN) %>%
   dplyr::filter(!(HAUL_TYPE == 17 & SPECIES_CODE != 69322)) %>%
-  dplyr::right_join(haul_table %>% 
-                      dplyr::select(-START_DATE)) %>%
+  # dplyr::right_join(haul_table %>% 
+  #                     dplyr::select(-START_DATE)) %>%
   dplyr::select(HAULJOIN, #VESSEL, CRUISE, HAUL, HAUL_TYPE, PERFORMANCE, START_DATE, START_HOUR, DURATION,
                 # DISTANCE_FISHED, NET_WIDTH, NET_MEASURED, NET_HEIGHT, MID_LATITUDE, MID_LONGITUDE, GIS_STATION,
                 # GEAR_DEPTH, BOTTOM_DEPTH, SURFACE_TEMPERATURE, GEAR_TEMPERATURE, WIRE_LENGTH, GEAR, ACCESSORIES,
-                # SUBSAMPLE, AREA_SWEPT, 
-                # SPECIMEN_ID = SPECIMENID, # should exist
+                # SUBSAMPLE, 
+                # AREA_SWEPT, # why is this here?
+                SPECIMEN_ID = CRAB_ID, 
                 SPECIES_CODE, 
                 SEX, 
-                LENGTH, #LENGTH_1MM, 
-                WIDTH, WIDTH_1MM, 
+                LENGTH, 
+                LENGTH_1MM, 
+                WIDTH, 
+                WIDTH_1MM, 
                 SHELL_CONDITION,
                 EGG_COLOR, 
                 EGG_CONDITION, 
@@ -195,22 +198,23 @@ specimen_table <- ebscrab %>%
                 DISEASE_DORSAL,
                 DISEASE_VENTRAL, 
                 DISEASE_LEGS, 
-                WEIGHT_G_CALCULATED = CALCULATED_WEIGHT, #CALCULATED_WEIGHT_1MM, 
+                WEIGHT_G_EST = CALCULATED_WEIGHT, #CALCULATED_WEIGHT_1MM, 
                 WEIGHT_G = WEIGHT, 
                 # GONAD_G = GONAD_WT, 
                 # SPECIMEN_SUBSAMPLE_METHOD,
                 SAMPLING_FACTOR) # does this actually get used for anything?
 
 specimen_table <- specimen_table %>%
-  dplyr::mutate(SPECIMEN_ID = NA, 
+  dplyr::mutate(
                 # AGE = NA, 
                 # MATURITY = NA, 
                 # GONAD_G = NA, 
                 # SPECIMEN_SUBSAMPLE_METHOD = NA, 
                 # AGE_DETERMINATION_METHOD = NA, 
+                LENGTH_MM_BIN = ifelse(is.na(LENGTH_1MM), LENGTH_1MM, WIDTH_1MM), 
                 LENGTH_MM = ifelse(is.na(LENGTH), LENGTH, WIDTH), 
                 LENGTH_TYPE = ifelse(is.na(LENGTH), 7, 8)) %>% 
-  dplyr::select(-LENGTH, -WIDTH) # -LENGTH_1MM, -WIDTH_1MM, -CALCULATED_WEIGHT_1MM, 
+  dplyr::select(-LENGTH, -WIDTH, -LENGTH_1MM, -WIDTH_1MM) # , -CALCULATED_WEIGHT_1MM
   # dplyr::rename(HAULJOIN, 
   #               SPECIMENID AS SPECIMEN_ID, 
   #               SPECIES_CODE, 
@@ -279,11 +283,17 @@ specimen_table <- specimen_table %>%
                               units = "Catagory", 
                               datatype = "NUMBER(10,0)",  
                               colname_desc = "....")) %>% 
-    dplyr::add_row(data.frame(colname = "WEIGHT_G_CALCULATED", 
-                              colname_long = "Weight in grams", 
+    dplyr::add_row(data.frame(colname = "WEIGHT_G_EST", 
+                              colname_long = "Estimated weight in grams", 
                               units = "Weight", 
                               datatype = "NUMBER(10,0)", 
-                              colname_desc = "Weight in grams"))  
+                              colname_desc = "Estimated weight in grams. "))  %>% 
+    dplyr::add_row(data.frame(colname = "LENGTH_MM_BIN", 
+                              colname_long = "Length bin in 1 milimeter bins", 
+                              units = "millimeters", 
+                              datatype = "NUMBER(10,0)", 
+                              colname_desc = "Length bin in 1 milimeter bins."))
+  
   
 write.csv(x = specimen_table, file = here::here("temp", "specimen_table.csv"), row.names = FALSE)
 
