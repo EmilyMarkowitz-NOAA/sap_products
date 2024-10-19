@@ -1,6 +1,7 @@
 {
-  "hash": "324230fb89a73bc9cf1370aadb4d3af7",
+  "hash": "e6f871f62a0da588dfa6d9fbc4b3dc4d",
   "result": {
+    "engine": "knitr",
     "markdown": "---\ntitle: Data description\n---\n\n\n\n\n\n[AKFIN Answers](https://akfin.psmfc.org/akfin-answers/) is an Oracle BI tool used for distributing data to stock assessors and other users. Usernames and passwords are distinct from direct AKFIN database credentials. \n\n\n\n::: {.cell}\n\n:::\n\n\n\n## Data tables\n\n### AKFIN_TEST\n\nNA\n\n\n\nNumber of columns: 1\n\n<table class=\"table table-striped\" style=\"margin-left: auto; margin-right: auto;\">\n <thead>\n  <tr>\n   <th style=\"text-align:left;\"> Column name from data </th>\n   <th style=\"text-align:left;\"> Descriptive column Name </th>\n   <th style=\"text-align:left;\"> Units </th>\n   <th style=\"text-align:left;\"> Oracle data type </th>\n   <th style=\"text-align:left;\"> Column description </th>\n  </tr>\n </thead>\n<tbody>\n  <tr>\n\n  </tr>\n</tbody>\n</table>\n\n\n \n\n<!-- # OLD TABLES -->\n\n\n\n::: {.cell}\n\n:::\n\n\n\n<!-- ## Data tables\n\n### AKFIN_TEST\n\nNA\n\n\n\nNumber of columns: 1\n\n<table class=\"table table-striped\" style=\"margin-left: auto; margin-right: auto;\">\n <thead>\n  <tr>\n   <th style=\"text-align:left;\"> Column name from data </th>\n   <th style=\"text-align:left;\"> Descriptive column Name </th>\n   <th style=\"text-align:left;\"> Units </th>\n   <th style=\"text-align:left;\"> Oracle data type </th>\n   <th style=\"text-align:left;\"> Column description </th>\n  </tr>\n </thead>\n<tbody>\n  <tr>\n\n  </tr>\n</tbody>\n</table>\n\n\n  -->\n\n\n\n::: {.cell}\n\n:::\n",
     "supporting": [
       "akfin-metadata_files"

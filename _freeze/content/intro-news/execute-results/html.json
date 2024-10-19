@@ -1,8 +1,11 @@
 {
-  "hash": "6c039f699da8804d1c80c455ac03639a",
+  "hash": "fcf5b3ee4edde2ae5ccc0f53912b0aed",
   "result": {
+    "engine": "knitr",
     "markdown": "---\ntitle: News\n---\n\n\n## News/change logs \n\n\n::: {.cell}\n\n:::\n\n\n -- [SAP_PRODUCTS ChangeLog (last produced on 2024-10-15), initial development & template](https://raw.githubusercontent.com/afsc-gap-products/gap_products/main/content/intro-news/2024-10-15.txt): Run completed by: Emily Markowitz (GAP)\n\n",
-    "supporting": [],
+    "supporting": [
+      "intro-news_files"
+    ],
     "filters": [
       "rmarkdown/pagebreak.lua"
     ],

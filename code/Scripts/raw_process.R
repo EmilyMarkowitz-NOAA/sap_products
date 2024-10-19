@@ -202,7 +202,7 @@ specimen_table <- ebscrab %>%
                 WEIGHT_G = WEIGHT, 
                 # GONAD_G = GONAD_WT, 
                 # SPECIMEN_SUBSAMPLE_METHOD,
-                SAMPLING_FACTOR) # does this actually get used for anything?
+                SAMPLING_FACTOR) # TOLEDO does this actually get used for anything?
 
 specimen_table <- specimen_table %>%
   dplyr::mutate(
@@ -211,23 +211,20 @@ specimen_table <- specimen_table %>%
                 # GONAD_G = NA, 
                 # SPECIMEN_SUBSAMPLE_METHOD = NA, 
                 # AGE_DETERMINATION_METHOD = NA, 
-                LENGTH_MM_BIN = ifelse(is.na(LENGTH_1MM), LENGTH_1MM, WIDTH_1MM), 
-                LENGTH_MM = ifelse(is.na(LENGTH), LENGTH, WIDTH), 
+                LENGTH_MM_BIN = ifelse(is.na(LENGTH_1MM), WIDTH_1MM, LENGTH_1MM), 
+                LENGTH_MM = ifelse(is.na(LENGTH), WIDTH, LENGTH), 
                 LENGTH_TYPE = ifelse(is.na(LENGTH), 7, 8)) %>% 
-  dplyr::select(-LENGTH, -WIDTH, -LENGTH_1MM, -WIDTH_1MM) # , -CALCULATED_WEIGHT_1MM
-  # dplyr::rename(HAULJOIN, 
-  #               SPECIMENID AS SPECIMEN_ID, 
-  #               SPECIES_CODE, 
-  #               LENGTH AS LENGTH_MM, 
-  #               SEX, 
-  #               WEIGHT AS WEIGHT_G, 
-  #               AGE, 
-  #               MATURITY, 
-  #               GONAD_WT AS GONAD_G, 
-  #               SPECIMEN_SUBSAMPLE_METHOD, 
-  #               SPECIMEN_SAMPLE_TYPE, 
-  #               AGE_DETERMINATION_METHOD ) # likely just null here, right?
+  dplyr::select(-LENGTH, -WIDTH, -LENGTH_1MM, -WIDTH_1MM, -LENGTH_MM_BIN) %>% # , -CALCULATED_WEIGHT_1MM
+  dplyr::relocate(HAULJOIN, SPECIMEN_ID, SPECIES_CODE, SEX, 
+                   WEIGHT_G, WEIGHT_G_EST, LENGTH_MM, LENGTH_TYPE, 
+                   SHELL_CONDITION, EGG_COLOR, EGG_CONDITION, 
+                   LENGTH_MM_MERUS, HEIGHT_CHELA_MM, 
+                   DISEASE_CODE, DISEASE_DORSAL, DISEASE_VENTRAL, DISEASE_LEGS, 
+                   SAMPLING_FACTOR)
   
+# TOLEDO - some length bins seem to be not matching to lengths
+# e<-specimen_table; View(e[e$LENGTH_MM_BIN != e$LENGTH_MM, c("LENGTH_MM_BIN", "LENGTH_MM")])
+
   metadata_column <- metadata_column %>% 
     dplyr::add_row(data.frame(colname = "SHELL_CONDITION", 
                               colname_long = "Condition of carapace shell", 
